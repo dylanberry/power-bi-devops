@@ -1,0 +1,38 @@
+---
+- hosts: azurevms
+  gather_facts: no
+  tasks:
+  - name: Install chocolatey
+    win_chocolatey:
+      name:
+      - chocolatey
+      - chocolatey-core.extension
+      state: present
+
+  - name: Install Power BI
+    win_chocolatey:
+      name: PowerBI
+      state: present
+      ignore_checksums: yes
+
+  - name: Install Azure Pipelines Agent
+    win_chocolatey:
+      name: azure-pipelines-agent
+      state: present
+      
+  - name: Configure Azure Pipelines Agent
+    ansible.windows.win_powershell:
+      script: |
+        [CmdletBinding()]
+        param (
+            [String]
+            $Path,
+
+            [Switch]
+            $Force
+        )
+
+        New-Item -Path $Path -ItemType Direcotry -Force:$Force
+      parameters:
+        Path: C:\temp
+        Force: true
