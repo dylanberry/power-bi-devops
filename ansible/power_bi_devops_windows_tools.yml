@@ -35,7 +35,7 @@
           [string]$PoolName,
 
           [Parameter(Mandatory=$true)]
-          [string]$AzdoAccount,
+          [string]$AzdoUri,
 
           [Parameter(Mandatory=$true)]
           [string]$AzdoPat,
@@ -63,7 +63,7 @@
                 # Set the current directory to the agent dedicated one previously created.
                 Push-Location -Path $Config.AgentInstallPath
 
-                $agentConfigArgs = "--unattended", "--url", $Config.ServerUrl, "--auth", "PAT", "--token", $Config.AzdoPat, "--pool", $Config.PoolName, "--agent", $Config.AgentName, "--windowslogonaccount", $Config.WindowsLogonAccount
+                $agentConfigArgs = "--unattended", "--url", $Config.AzdoUri, "--auth", "PAT", "--token", $Config.AzdoPat, "--pool", $Config.PoolName, "--agent", $Config.AgentName, "--windowslogonaccount", $Config.WindowsLogonAccount
                 if ($Config.RunAsAutoLogon) {
                     # Configure agent to run with autologon enabled
                     Set-MachineForAutologon -Config $Config
@@ -100,7 +100,7 @@
             AgentInstallPath     = $AgentInstallPath
             AgentName            = $env:ComputerName
             PoolName             = $PoolName
-            ServerUrl            = "https://dev.azure.com/$AzdoAccount"
+            AzdoUri              = $AzdoUri
             AzdoPat              = $AzdoPat
             RunAsAutoLogon       = $True
             WindowsLogonAccount  = $WindowsLogonAccount
