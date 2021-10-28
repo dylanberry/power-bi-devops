@@ -24,9 +24,9 @@ $managementIP = (Invoke-WebRequest http://ipecho.net/plain).Content
 
 # Ensure backend storage account
 az group create --name $BackendResourceGroupName --location $Location
-az storage account create --name $BackendStorageAccountName --resource-group $BackendResourceGroupName --location $Location --sku 'Standard_LRS'
-az storage container create --name $backendStorageContainerName  --account-name $BackendStorageAccountName
-$storageAccountKeys = az storage account keys list --resource-group $BackendResourceGroupName --account-name $BackendStorageAccountName | ConvertFrom-Json
+az storage account create --name $BackendStorageAccountName.ToLower() --resource-group $BackendResourceGroupName --location $Location --sku 'Standard_LRS'
+az storage container create --name $backendStorageContainerName  --account-name $BackendStorageAccountName.ToLower()
+$storageAccountKeys = az storage account keys list --resource-group $BackendResourceGroupName --account-name $BackendStorageAccountName.ToLower() | ConvertFrom-Json
 $storageAccountKey = $storageAccountKeys[0].value
 
 # Set terraform AzureRM provider credentials from service connection
@@ -40,7 +40,7 @@ try {
     
     terraform init `
     -backend-config="resource_group_name=$BackendResourceGroupName" `
-    -backend-config="storage_account_name=$backendStorageAccountName" `
+    -backend-config="storage_account_name=$($BackendStorageAccountName.ToLower())" `
     -backend-config="container_name=$backendStorageContainerName" `
     -backend-config="key=$backendStateFileName" `
     -backend-config="access_key=$storageAccountKey"
