@@ -24,15 +24,95 @@
     ansible.windows.win_powershell:
       script: |
         [CmdletBinding()]
-        param (
-            [String]
-            $Path,
+        param(
+          [Parameter]
+          [string]$AgentInstallPath,
 
-            [Switch]
-            $Force
+          [Parameter]
+          [string]$AgentName,
+
+          [Parameter(Mandatory=$true)]
+          [string]$PoolName,
+
+          [Parameter(Mandatory=$true)]
+          [string]$AzdoAccount,
+
+          [Parameter(Mandatory=$true)]
+          [string]$AzdoPat,
+
+          [Parameter(Mandatory=$true)]
+          [string]$RunAsAutoLogon,
+
+          [Parameter(Mandatory=$true)]
+          [string]$WindowsLogonAccount,
+
+          [Parameter(Mandatory=$true)]
+          [string]$WindowsLogonPassword,
+
+          [Parameter(Mandatory=$true)]
+          [string]$WorkDirectory = ''
         )
 
-        New-Item -Path $Path -ItemType Direcotry -Force:$Force
+        function Install-Agent
+        {
+            param(
+                $Config
+            )
+
+            try {
+                # Set the current directory to the agent dedicated one previously created.
+                Push-Location -Path $Config.AgentInstallPath
+
+                $agentConfigArgs = "--unattended", "--url", $Config.ServerUrl, "--auth", "PAT", "--token", $Config.AzdoPat, "--pool", $Config.PoolName, "--agent", $Config.AgentName, "--windowslogonaccount", $Config.WindowsLogonAccount
+                if ($Config.RunAsAutoLogon) {
+                    # Configure agent to run with autologon enabled
+                    Set-MachineForAutologon -Config $Config
+                    $agentConfigArgs += "--overwriteAutoLogon", "--runAsAutoLogon"
+                } else {
+                    # Configure agent to run as a service
+                    $agentConfigArgs += "--runasservice"
+                }
+
+                if (-not [string]::IsNullOrWhiteSpace($Config.WindowsLogonPassword)) {
+                    $agentConfigArgs += "--windowslogonpassword", $Config.WindowsLogonPassword
+                }
+                if (-not [string]::IsNullOrWhiteSpace($Config.WorkDirectory)) {
+                    $agentConfigArgs += "--work", $Config.WorkDirectory
+                }
+                $agentCommandPath = Join-Path $agentInstallPath -ChildPath 'config.cmd'
+                & $agentCommandPath $agentConfigArgs
+                if ($LASTEXITCODE -ne 0) {
+                    Write-Error "Agent configuration failed with exit code: $LASTEXITCODE"
+                }
+            } finally {
+                Pop-Location
+            }
+        }
+
+        if (-not $AgentInstallPath) {
+          $AgentInstallPath = 'C:\agent'
+        }
+
+        # Call the agent with the configure command and all the options (this creates the settings file)
+        # without prompting the user or blocking the cmd execution.
+        Write-Host 'Installing agent'
+        $config = @{
+            AgentInstallPath     = $AgentInstallPath
+            AgentName            = $env:ComputerName
+            PoolName             = $PoolName
+            ServerUrl            = "https://dev.azure.com/$AzdoAccount"
+            AzdoPat              = $AzdoPat
+            RunAsAutoLogon       = $True
+            WindowsLogonAccount  = $WindowsLogonAccount
+            WindowsLogonPassword = $WindowsLogonPassword
+            WorkDirectory        = $WorkDirectory
+        }
+        Install-Agent -Config $config
       parameters:
-        Path: C:\temp
-        Force: true
+        AgentInstallPath: "{{ AgentInstallPath }}"
+        PoolName: "{{ PoolName }}"
+        AzdoAccount: "{{ AzdoAccount }}"
+        AzdoPat: "{{ AzdoPat }}"
+        WindowsLogonAccount: "{{ WindowsLogonAccount }}"
+        WindowsLogonPassword: "{{ WindowsLogonPassword }}"
+        WorkDirectory: "{{ WorkDirectory }}"

@@ -36,6 +36,14 @@ $hosts | Out-File 'hosts'
 
 echo 'Run ansible playbook'
 
-ansible-playbook -i hosts ./power_bi_devops_windows_tools.yml
+$playbookVars = "PoolName=Default
+AzdoAccount=$(System.TeamFoundationCollectionUri)
+AzdoPat=$($env:AZURE_DEVOPS_EXT_PAT)
+WindowsLogonAccount=$($tfOutput.vmUserName.value)
+WindowsLogonPassword=$($tfOutput.vmPassword.value)
+WorkDirectory=''"
+
+ansible-playbook -i hosts ./power_bi_devops_windows_tools.yml `
+    --extra-vars $playbookVars
 
 popd
