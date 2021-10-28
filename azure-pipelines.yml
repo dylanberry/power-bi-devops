@@ -1,7 +1,26 @@
+parameters:
+- name: EnvironmentName
+  displayName: Environment Name
+  type: string
+- name: EnvironmentType
+  displayName: Environment Type
+  type: string
+- name: ServiceConnection
+  displayName: Service Connection
+  type: string
+  default: SL ESS PROD - IACTest
+
 trigger: none
 
 pool:
   vmImage: windows-latest
+
+variables:
+  location: 'CanadaCentral'
+  backendResourceGroupName: 'TerraForm'
+  backendStorageAccountName: 'TFStatePbiDevOps'
+  backendStorageAccountContainerName: 'TerraFormState'
+  vmResourceGroupName: 'PbiDevOps'
 
 steps:
 - task: TerraformInstaller@0
@@ -14,7 +33,7 @@ steps:
     scriptType: 'pscore'
     scriptLocation: 'scriptPath'
     scriptPath: 'Create-PowerBIPipelineAgents.ps1'
-    arguments: '-AzdoUri ''$(System.TeamFoundationCollectionUri)'''
+    arguments: '-AzdoUri "$(System.TeamFoundationCollectionUri)" -Location "$(location)" -BackendResourceGroupName "$(backendResourceGroupName)" -BackendStorageAccountName "$(backendStorageAccountName)" -BackendStorageContainerName "$(backendStorageAccountContainerName)" -VmResourceGroupName "$(vmResourceGroupName)"'
     failOnStandardError: true
   env:
     SYSTEM_ACCESSTOKEN: $(System.AccessToken)
