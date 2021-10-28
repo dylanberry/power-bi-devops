@@ -1,8 +1,6 @@
 $ansible_control_node_ip = (Invoke-WebRequest http://ipecho.net/plain).Content
 $management_ip = (Invoke-WebRequest http://ipecho.net/plain).Content
 
-az login
-
 pushd terraform
 
 terraform apply `
