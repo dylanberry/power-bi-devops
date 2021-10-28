@@ -39,11 +39,11 @@ try {
     pushd terraform
     
     terraform init `
-    -backend-config="resource_group_name=$BackendResourceGroupName" `
-    -backend-config="storage_account_name=$($BackendStorageAccountName.ToLower())" `
-    -backend-config="container_name=$backendStorageContainerName" `
-    -backend-config="key=$backendStateFileName" `
-    -backend-config="access_key=$storageAccountKey"
+        -backend-config="resource_group_name=$BackendResourceGroupName" `
+        -backend-config="storage_account_name=$($BackendStorageAccountName.ToLower())" `
+        -backend-config="container_name=$backendStorageContainerName" `
+        -backend-config="key=$backendStateFileName" `
+        -backend-config="access_key=$storageAccountKey"
     
     terraform apply `
         -var="location=$Location" `
