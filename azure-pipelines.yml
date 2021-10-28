@@ -1,10 +1,4 @@
 parameters:
-- name: EnvironmentName
-  displayName: Environment Name
-  type: string
-- name: EnvironmentType
-  displayName: Environment Type
-  type: string
 - name: ServiceConnection
   displayName: Service Connection
   type: string
