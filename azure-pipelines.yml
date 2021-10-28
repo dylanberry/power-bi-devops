@@ -4,8 +4,12 @@ pool:
   vmImage: windows-latest
 
 steps:
-- task: PowerShell@2
+
+- task: AzureCLI@2
   inputs:
-    filePath: 'Create-PowerBIPipelineAgents.ps1'
+    azureSubscription: 'Visual Studio Enterprise with MSDN(892f38d0-c75b-4c0f-aeee-4d550baea221)'
+    scriptType: 'pscore'
+    scriptLocation: 'scriptPath'
+    scriptPath: 'Create-PowerBIPipelineAgents.ps1'
   env:
     SYSTEM_ACCESSTOKEN: $(System.AccessToken)
