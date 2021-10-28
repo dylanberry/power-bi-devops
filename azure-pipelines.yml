@@ -4,7 +4,9 @@ pool:
   vmImage: windows-latest
 
 steps:
-
+- task: TerraformInstaller@0
+  inputs:
+    terraformVersion: 'latest'
 - task: AzureCLI@2
   inputs:
     azureSubscription: 'Visual Studio Enterprise with MSDN(892f38d0-c75b-4c0f-aeee-4d550baea221)'
