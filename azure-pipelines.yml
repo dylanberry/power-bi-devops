@@ -8,7 +8,6 @@ parameters:
 - name: ServiceConnection
   displayName: Service Connection
   type: string
-  default: SL ESS PROD - IACTest
 
 trigger: none
 
@@ -29,7 +28,7 @@ steps:
 
 - task: AzureCLI@2
   inputs:
-    azureSubscription: 'Visual Studio Enterprise with MSDN(892f38d0-c75b-4c0f-aeee-4d550baea221)'
+    azureSubscription: '${{ parameters.ServiceConnection }}'
     scriptType: 'pscore'
     scriptLocation: 'scriptPath'
     scriptPath: 'Create-PowerBIPipelineAgents.ps1'
