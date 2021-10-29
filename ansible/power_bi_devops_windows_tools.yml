@@ -62,8 +62,8 @@
                 if (-not [string]::IsNullOrWhiteSpace($Config.WorkDirectory)) {
                     $agentConfigArgs += "--work", $Config.WorkDirectory
                 }
-                $agentCommandPath = Join-Path $Config.AgentInstallPath -ChildPath 'config.cmd'
-                #& $agentCommandPath $agentConfigArgs
+                $agentConfigPath = Join-Path $Config.AgentInstallPath -ChildPath 'config.cmd'
+                #& $agentConfigPath $agentConfigArgs
                 if ($LASTEXITCODE -ne 0) {
                     Write-Error "Agent configuration failed with exit code: $LASTEXITCODE"
                 }
@@ -91,6 +91,8 @@
             WorkDirectory        = $WorkDirectory
         }
         Install-Agent -Config $config
+        $agentRunPath = Join-Path $Config.AgentInstallPath -ChildPath 'run.cmd'
+        #& $agentRunPath $agentConfigArgs
       parameters:
         PoolName: '{{ PoolName }}'
         AzdoUri: '{{ AzdoUri }}'
