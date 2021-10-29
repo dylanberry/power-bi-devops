@@ -68,8 +68,8 @@ finally {
 try {
     pushd ansible
 
-    pip install ansible[azure]
-    
+    pip install ansible
+
     echo 'Generate ansible inventory from Terraform output'
 
     $hosts = "[azurevms]
