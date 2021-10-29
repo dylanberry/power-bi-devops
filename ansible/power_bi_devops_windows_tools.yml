@@ -90,8 +90,7 @@
             WindowsLogonPassword = $WindowsLogonPassword;
             WorkDirectory        = $WorkDirectory
         }
-        $config
-        # # Install-Agent -Config $config
+        Install-Agent -Config $config
       parameters:
         PoolName: '{{ PoolName }}'
         AzdoUri: '{{ AzdoUri }}'
