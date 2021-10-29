@@ -26,6 +26,9 @@ steps:
     addToPath: true
     architecture: 'x64'
 
+- pwsh: |
+    pip install --upgrade pip
+
 - task: AzureCLI@2
   inputs:
     azureSubscription: '${{ parameters.ServiceConnection }}'
