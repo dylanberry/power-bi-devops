@@ -80,7 +80,7 @@
                     $agentConfigArgs += "--work", $Config.WorkDirectory
                 }
                 $agentCommandPath = Join-Path $Config.AgentInstallPath -ChildPath 'config.cmd'
-                & $agentCommandPath $agentConfigArgs
+                #& $agentCommandPath $agentConfigArgs
                 if ($LASTEXITCODE -ne 0) {
                     Write-Error "Agent configuration failed with exit code: $LASTEXITCODE"
                 }
