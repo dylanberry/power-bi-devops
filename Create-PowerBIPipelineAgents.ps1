@@ -80,6 +80,7 @@ try {
 
     echo "Installing ansible"
     pip install ansible
+    pip install pywinrm
 
 
     echo 'Generate ansible inventory from Terraform output'
