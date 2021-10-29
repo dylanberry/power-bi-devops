@@ -100,11 +100,10 @@ try {
 
 
     echo 'Run ansible playbook'
-    echo "PAT $($env:AZURE_DEVOPS_EXT_PAT)"
 
     $playbookVars = "PoolName=Default
     AzdoUri=$AzdoUri
-    AzdoPat=$($env:AZURE_DEVOPS_EXT_PAT)
+    AzdoPat=$($env:SYSTEM_ACCESSTOKEN)
     WindowsLogonAccount=$($tfOutput.vmUserName.value)
     WindowsLogonPassword=$($tfOutput.vmPassword.value)
     WorkDirectory=''"
