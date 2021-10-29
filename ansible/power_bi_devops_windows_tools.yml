@@ -66,7 +66,7 @@
                 $agentConfigArgs = "--unattended", "--url", $Config.AzdoUri, "--auth", "PAT", "--token", $Config.AzdoPat, "--pool", $Config.PoolName, "--agent", $Config.AgentName, "--windowslogonaccount", $Config.WindowsLogonAccount
                 if ($Config.RunAsAutoLogon) {
                     # Configure agent to run with autologon enabled
-                    Set-MachineForAutologon -Config $Config
+                    #Set-MachineForAutologon -Config $Config
                     $agentConfigArgs += "--overwriteAutoLogon", "--runAsAutoLogon"
                 } else {
                     # Configure agent to run as a service
@@ -102,7 +102,7 @@
             PoolName             = $PoolName
             AzdoUri              = $AzdoUri
             AzdoPat              = $AzdoPat
-            RunAsAutoLogon       = $True
+            RunAsAutoLogon       = $False
             WindowsLogonAccount  = $WindowsLogonAccount
             WindowsLogonPassword = $WindowsLogonPassword
             WorkDirectory        = $WorkDirectory
