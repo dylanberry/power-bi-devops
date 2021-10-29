@@ -62,6 +62,7 @@ try {
         -var="ansible_control_node_ip=$ansibleControlNodeIP" `
         -var="domain_name_prefix=pbidevops" `
         -var="management_ip=$managementIP" `
+        -lock=false `
         -auto-approve
     
 
