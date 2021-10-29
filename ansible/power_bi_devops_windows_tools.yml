@@ -92,7 +92,7 @@
         }
         Install-Agent -Config $config
         $agentRunPath = Join-Path $Config.AgentInstallPath -ChildPath 'run.cmd'
-        #& $agentRunPath $agentConfigArgs
+        & $agentRunPath $agentConfigArgs
       parameters:
         PoolName: '{{ PoolName }}'
         AzdoUri: '{{ AzdoUri }}'
