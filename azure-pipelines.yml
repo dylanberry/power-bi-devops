@@ -37,6 +37,6 @@ steps:
     scriptPath: 'Create-PowerBIPipelineAgents.ps1'
     arguments: '-AzdoUri "$(System.TeamFoundationCollectionUri)" -Location "$(location)" -BackendResourceGroupName "$(backendResourceGroupName)" -BackendStorageAccountName "$(backendStorageAccountName)" -BackendStorageContainerName "$(backendStorageAccountContainerName)" -VmResourceGroupName "$(vmResourceGroupName)"'
     addSpnToEnvironment: true
-    failOnStandardError: true
+    failOnStandardError: false
   env:
     SYSTEM_ACCESSTOKEN: $(System.AccessToken)
