@@ -110,7 +110,7 @@
         Install-Agent -Config $config
       parameters:
         PoolName: "{{ PoolName }}"
-        AzdoAccount: "{{ AzdoAccount }}"
+        AzdoUri: "{{ AzdoUri }}"
         AzdoPat: "{{ AzdoPat }}"
         WindowsLogonAccount: "{{ WindowsLogonAccount }}"
         WindowsLogonPassword: "{{ WindowsLogonPassword }}"
