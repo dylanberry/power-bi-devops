@@ -23,7 +23,7 @@ $ansibleControlNodeIP = (Invoke-WebRequest http://ipecho.net/plain).Content
 $managementIP = (Invoke-WebRequest http://ipecho.net/plain).Content
 
 
-# Ensure backend storage account
+echo "Ensure backend storage account"
 az group create --name $BackendResourceGroupName --location $Location
 az storage account create --name $BackendStorageAccountName.ToLower() --resource-group $BackendResourceGroupName --location $Location --sku 'Standard_LRS'
 
@@ -33,7 +33,7 @@ $storageAccountKey = $storageAccountKeys[0].value
 az storage container create --name $backendStorageContainerName.ToLower()  --account-name $BackendStorageAccountName.ToLower() --account-key $storageAccountKey
 
 
-# Set terraform AzureRM provider credentials from service connection
+echo "Set terraform AzureRM provider credentials from service connection"
 $env:ARM_SUBSCRIPTION_ID = (az account show | ConvertFrom-Json).id
 $env:ARM_CLIENT_ID = $env:servicePrincipalId
 $env:ARM_CLIENT_SECRET = $env:servicePrincipalKey
@@ -41,8 +41,11 @@ $env:ARM_TENANT_ID = $env:tenantId
 
 
 try {
+    echo "Changing to terraform directory"
     pushd terraform
     
+    
+    echo "Initializing terraform backend"
     terraform init `
         -backend-config="resource_group_name=$BackendResourceGroupName" `
         -backend-config="storage_account_name=$($BackendStorageAccountName.ToLower())" `
@@ -50,6 +53,8 @@ try {
         -backend-config="key=$backendStateFileName" `
         -backend-config="access_key=$storageAccountKey"
     
+
+    echo "Applying terraform configuration"
     terraform apply `
         -var="location=$Location" `
         -var="resource_group=$VmResourceGroupName" `
@@ -58,6 +63,8 @@ try {
         -var="management_ip=$managementIP" `
         -auto-approve
     
+
+    echo "Gathering terraform output"
     $tfOutput = terraform output -json | ConvertFrom-Json
 }
 finally {
@@ -66,9 +73,13 @@ finally {
 
 
 try {
+    echo "Changing to ansible directory"
     pushd ansible
 
+
+    echo "Installing ansible"
     pip install ansible
+
 
     echo 'Generate ansible inventory from Terraform output'
 
@@ -84,6 +95,7 @@ try {
     ansible_port=$($tfOutput.vmAnsiblePort.value)"
 
     $hosts | Out-File 'hosts'
+
 
     echo 'Run ansible playbook'
 
