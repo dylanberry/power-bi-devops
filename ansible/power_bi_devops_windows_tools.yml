@@ -79,7 +79,7 @@
                 if (-not [string]::IsNullOrWhiteSpace($Config.WorkDirectory)) {
                     $agentConfigArgs += "--work", $Config.WorkDirectory
                 }
-                $agentCommandPath = Join-Path $agentInstallPath -ChildPath 'config.cmd'
+                $agentCommandPath = Join-Path $Config.AgentInstallPath -ChildPath 'config.cmd'
                 & $agentCommandPath $agentConfigArgs
                 if ($LASTEXITCODE -ne 0) {
                     Write-Error "Agent configuration failed with exit code: $LASTEXITCODE"
