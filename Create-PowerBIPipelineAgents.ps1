@@ -43,8 +43,9 @@ $env:ARM_TENANT_ID = $env:tenantId
 try {
     echo "Changing to terraform directory"
     pushd terraform
+    $backendStateFileName = "$VmResourceGroupName.terraform.tfstate"    
     
-    
+
     echo "Initializing terraform backend"
     terraform init `
         -backend-config="resource_group_name=$BackendResourceGroupName" `
