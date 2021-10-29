@@ -25,31 +25,14 @@
       script: |
         [CmdletBinding()]
         param (
-          [Parameter]
           [string]$AgentInstallPath,
-
-          [Parameter]
           [string]$AgentName,
-
-          [Parameter(Mandatory=$true)]
           [string]$PoolName,
-
-          [Parameter(Mandatory=$true)]
           [string]$AzdoUri,
-
-          [Parameter(Mandatory=$true)]
           [string]$AzdoPat,
-
-          [Parameter(Mandatory=$true)]
           [string]$RunAsAutoLogon,
-
-          [Parameter(Mandatory=$true)]
           [string]$WindowsLogonAccount,
-
-          [Parameter(Mandatory=$true)]
           [string]$WindowsLogonPassword,
-
-          [Parameter]
           [string]$WorkDirectory
         )
 
