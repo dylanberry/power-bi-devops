@@ -109,7 +109,6 @@
         }
         Install-Agent -Config $config
       parameters:
-        AgentInstallPath: "{{ AgentInstallPath }}"
         PoolName: "{{ PoolName }}"
         AzdoAccount: "{{ AzdoAccount }}"
         AzdoPat: "{{ AzdoPat }}"
