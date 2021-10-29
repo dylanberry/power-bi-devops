@@ -22,18 +22,23 @@ param(
 $ansibleControlNodeIP = (Invoke-WebRequest http://ipecho.net/plain).Content
 $managementIP = (Invoke-WebRequest http://ipecho.net/plain).Content
 
+
 # Ensure backend storage account
 az group create --name $BackendResourceGroupName --location $Location
 az storage account create --name $BackendStorageAccountName.ToLower() --resource-group $BackendResourceGroupName --location $Location --sku 'Standard_LRS'
-az storage container create --name $backendStorageContainerName  --account-name $BackendStorageAccountName.ToLower()
+
 $storageAccountKeys = az storage account keys list --resource-group $BackendResourceGroupName --account-name $BackendStorageAccountName.ToLower() | ConvertFrom-Json
 $storageAccountKey = $storageAccountKeys[0].value
+
+az storage container create --name $backendStorageContainerName  --account-name $BackendStorageAccountName.ToLower() --account-key $storageAccountKey
+
 
 # Set terraform AzureRM provider credentials from service connection
 $env:ARM_SUBSCRIPTION_ID = (az account show | ConvertFrom-Json).id
 $env:ARM_CLIENT_ID = $env:servicePrincipalId
 $env:ARM_CLIENT_SECRET = $env:servicePrincipalKey
 $env:ARM_TENANT_ID = $env:tenantId
+
 
 try {
     pushd terraform
@@ -58,7 +63,6 @@ try {
 finally {
     popd
 }
-
 
 
 try {
