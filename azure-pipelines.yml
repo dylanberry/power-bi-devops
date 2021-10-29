@@ -6,7 +6,7 @@ parameters:
 trigger: none
 
 pool:
-  vmImage: windows-latest
+  vmImage: ubuntu-latest
 
 variables:
   location: 'CanadaCentral'
@@ -25,6 +25,9 @@ steps:
     versionSpec: '3.x'
     addToPath: true
     architecture: 'x64'
+
+- pwsh: |
+    pip install --upgrade pip
 
 - task: AzureCLI@2
   inputs:
