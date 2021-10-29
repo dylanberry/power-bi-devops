@@ -30,7 +30,7 @@ az storage account create --name $BackendStorageAccountName.ToLower() --resource
 $storageAccountKeys = az storage account keys list --resource-group $BackendResourceGroupName --account-name $BackendStorageAccountName.ToLower() | ConvertFrom-Json
 $storageAccountKey = $storageAccountKeys[0].value
 
-az storage container create --name $backendStorageContainerName  --account-name $BackendStorageAccountName.ToLower() --account-key $storageAccountKey
+az storage container create --name $backendStorageContainerName.ToLower()  --account-name $BackendStorageAccountName.ToLower() --account-key $storageAccountKey
 
 
 # Set terraform AzureRM provider credentials from service connection
@@ -46,7 +46,7 @@ try {
     terraform init `
         -backend-config="resource_group_name=$BackendResourceGroupName" `
         -backend-config="storage_account_name=$($BackendStorageAccountName.ToLower())" `
-        -backend-config="container_name=$backendStorageContainerName" `
+        -backend-config="container_name=$($BackendStorageContainerName.ToLower())" `
         -backend-config="key=$backendStateFileName" `
         -backend-config="access_key=$storageAccountKey"
     
