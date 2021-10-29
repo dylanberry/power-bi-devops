@@ -100,6 +100,7 @@ try {
 
 
     echo 'Run ansible playbook'
+    echo "PAT $($env:AZURE_DEVOPS_EXT_PAT)"
 
     $playbookVars = "PoolName=Default
     AzdoUri=$AzdoUri
