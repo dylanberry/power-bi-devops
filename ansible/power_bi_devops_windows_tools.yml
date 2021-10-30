@@ -106,10 +106,10 @@
       var: pwsh_output
       verbosity: 2
 
-  - name: Print stdout
+  - name: Print host_out
     debug:
-      msg: "stdout {{ pwsh_output.stdout }}"
+      msg: "host_out {{ pwsh_output.host_out }}"
 
-  - name: Print stdout
+  - name: Print output
     debug:
-      msg: "stdout {{ pwsh_output.host_out }}"
+      msg: "output {{ pwsh_output.output }}"
