@@ -87,15 +87,15 @@ try {
     echo 'Generate ansible inventory from Terraform output'
 
     $hosts = "[azurevms]
-    $($tfOutput.vmIps.value -join ""`n"")
+$($tfOutput.vmIps.value -join ""`n"")
 
-    [azurevms:vars]
-    ansible_user=$($tfOutput.vmUserName.value)
-    ansible_password=$($tfOutput.vmPassword.value)
-    ansible_connection=winrm
-    ansible_winrm_transport=basic
-    ansible_winrm_server_cert_validation=ignore
-    ansible_port=$($tfOutput.vmAnsiblePort.value)"
+[azurevms:vars]
+ansible_user=$($tfOutput.vmUserName.value)
+ansible_password=$($tfOutput.vmPassword.value)
+ansible_connection=winrm
+ansible_winrm_transport=basic
+ansible_winrm_server_cert_validation=ignore
+ansible_port=$($tfOutput.vmAnsiblePort.value)"
 
     $hosts | Out-File 'hosts'
 
