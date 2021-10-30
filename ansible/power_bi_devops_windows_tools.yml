@@ -99,9 +99,9 @@
         AzdoPat: '{{ AzdoPat }}'
         WindowsLogonAccount: '{{ WindowsLogonAccount }}'
         WindowsLogonPassword: '{{ WindowsLogonPassword }}'
-      register: result
+    register: pwsh_output
 
   - name: Print return information from the previous task
     ansible.builtin.debug:
-      var: result
+      var: pwsh_output
       verbosity: 2
