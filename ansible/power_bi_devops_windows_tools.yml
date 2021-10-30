@@ -99,3 +99,6 @@
         AzdoPat: '{{ AzdoPat }}'
         WindowsLogonAccount: '{{ WindowsLogonAccount }}'
         WindowsLogonPassword: '{{ WindowsLogonPassword }}'
+      register: result
+
+  - debug: var=result.stdout_lines
