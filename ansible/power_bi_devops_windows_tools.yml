@@ -105,3 +105,11 @@
     ansible.builtin.debug:
       var: pwsh_output
       verbosity: 2
+
+  - name: Print stdout
+    debug:
+      msg: "stdout {{ pwsh_output.stdout }}"
+
+  - name: Print stdout
+    debug:
+      msg: "stdout {{ pwsh_output.host_out }}"
