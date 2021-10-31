@@ -109,8 +109,13 @@ ansible_port=$($tfOutput.vmAnsiblePort.value)"
     WindowsLogonPassword=$($tfOutput.vmPassword.value)
     WorkDirectory=''"
 
-    ansible-playbook -i hosts ./power_bi_devops_windows_tools.yml `
+    $rawResult = ansible-playbook -i hosts ./power_bi_devops_windows_tools.yml `
         --extra-vars $playbookVars
+    echo 'Raw Result'
+    $rawResult
+    $result = $rawResult | ConvertFrom-Json
+    echo 'Result'
+    $result
 }
 finally {
     popd

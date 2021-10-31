@@ -66,6 +66,7 @@
                 #& $agentConfigPath $agentConfigArgs
                 if ($LASTEXITCODE -ne 0) {
                     Write-Error "Agent configuration failed with exit code: $LASTEXITCODE"
+                    Get-ChildItem "$AgentInstallPath/*.log" | Get-Content
                 }
             } finally {
                 Pop-Location
