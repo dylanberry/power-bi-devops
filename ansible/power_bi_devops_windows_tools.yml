@@ -91,6 +91,7 @@
             WorkDirectory        = $WorkDirectory
         }
         Install-Agent -Config $config
+        
         $agentRunPath = Join-Path $Config.AgentInstallPath -ChildPath 'run.cmd'
         & $agentRunPath
       parameters:
@@ -104,11 +105,3 @@
   - name: Print pwsh_output
     debug:
       msg: "host_out {{ pwsh_output }}"
-
-  - name: Print pwsh_output.host_out
-    debug:
-      msg: "host_out {{ pwsh_output.host_out }}"
-
-  - name: Print pwsh_output.output
-    debug:
-      msg: "output {{ pwsh_output.output }}"
