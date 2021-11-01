@@ -66,7 +66,6 @@
                 #& $agentConfigPath $agentConfigArgs
                 if ($LASTEXITCODE -ne 0) {
                     Write-Error "Agent configuration failed with exit code: $LASTEXITCODE"
-                    Get-ChildItem "$AgentInstallPath/*.log" | Get-Content
                 }
             } finally {
                 Pop-Location
@@ -105,4 +104,14 @@
 
   - name: Print pwsh_output
     debug:
-      msg: "host_out {{ pwsh_output }}"
+      msg: "{{ pwsh_output }}"
+        
+  - name: Output Azure Pipelines Agent Configuration Log
+    ansible.windows.win_powershell:
+      script: |
+        Get-ChildItem "C:\agent\*.log" | Get-Content
+    register: log_output
+
+  - name: Print log_output
+    debug:
+      msg: "{{ log_output }}"
