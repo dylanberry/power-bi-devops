@@ -109,7 +109,8 @@
   - name: Output Azure Pipelines Agent Configuration Log
     ansible.windows.win_powershell:
       script: |
-        Get-ChildItem "C:\agent\_diag\*.log" | Get-Content
+        $log = Get-ChildItem "C:\agent\_diag\*.log" | Get-Content
+        echo $log
     register: log_output
 
   - name: Print log_output

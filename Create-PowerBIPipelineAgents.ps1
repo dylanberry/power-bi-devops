@@ -113,9 +113,9 @@ ansible_port=$($tfOutput.vmAnsiblePort.value)"
         --extra-vars $playbookVars
     echo 'Raw Result'
     $rawResult
-    $result = $rawResult | ConvertFrom-Json
-    echo 'Result'
-    $result
+    # $result = $rawResult | ConvertFrom-Json
+    # echo 'Result'
+    # $result
 }
 finally {
     popd
