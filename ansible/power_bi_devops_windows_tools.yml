@@ -46,6 +46,8 @@
                 # Set the current directory to the agent dedicated one previously created.
                 Push-Location -Path $Config.AgentInstallPath
 
+                Remove-Item "$($Config.AgentInstallPath)\_diag\*" -Recurse -Force
+
                 $agentConfigArgs = "--unattended", "--url", $Config.AzdoUri, "--auth", "PAT", "--token", $Config.AzdoPat, "--pool", $Config.PoolName, "--agent", $Config.AgentName, "--windowslogonaccount", $Config.WindowsLogonAccount
                 if ($Config.RunAsAutoLogon) {
                     # Configure agent to run with autologon enabled
