@@ -9,11 +9,17 @@ pool:
   vmImage: ubuntu-latest
 
 variables:
-  location: 'CanadaCentral'
-  backendResourceGroupName: 'TerraForm'
-  backendStorageAccountName: 'TFStatePbiDevOps'
-  backendStorageAccountContainerName: 'TerraFormState'
-  vmResourceGroupName: 'PbiDevOps'
+  - group: AgentPoolAdmin
+  - name: location
+    value: 'CanadaCentral'
+  - name: backendResourceGroupName
+    value: 'TerraForm'
+  - name: backendStorageAccountName
+    value: 'TFStatePbiDevOps'
+  - name: backendStorageAccountContainerName
+    value: 'TerraFormState'
+  - name: vmResourceGroupName
+    value: 'PbiDevOps'
 
 steps:
 - task: TerraformInstaller@0
@@ -39,4 +45,4 @@ steps:
     addSpnToEnvironment: true
     failOnStandardError: false
   env:
-    SYSTEM_ACCESSTOKEN: $(System.AccessToken)
+    SYSTEM_ACCESSTOKEN: $(PAT)
