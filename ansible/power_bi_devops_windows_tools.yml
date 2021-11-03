@@ -45,7 +45,7 @@
         try {
           Push-Location -Path $AgentInstallPath
           
-          Remove-Item "$AgentInstallPath\_diag\*" -Recurse -Force
+          Remove-Item "$AgentInstallPath\_diag\*" -Recurse -Force -ErrorAction SilentlyContinue
 
           $agentConfigCmd = "cmd.exe /C .\config.cmd --unattended --url '$AzdoUri' --auth 'pat' --token '$AzdoPat' --pool '$PoolName' --agent '$AgentName' --runAsService --windowsLogonAccount '$WindowsLogonAccount' --windowsLogonPassword '$WindowsLogonPassword'"
           Invoke-Expression -Command $agentConfigCmd
