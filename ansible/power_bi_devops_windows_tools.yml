@@ -41,29 +41,14 @@
         }
 
         $AgentName = $env:ComputerName
-        $RunAsAutoLogon = $False
 
         try {
-          # Set the current directory to the agent dedicated one previously created.
           Push-Location -Path $AgentInstallPath
-
+          
           Remove-Item "$AgentInstallPath\_diag\*" -Recurse -Force
 
-          $agentConfigArgs = "--unattended", "--url", $AzdoUri, "--auth", "PAT", "--token", $AzdoPat, "--pool", $PoolName, "--agent", $AgentName, "--windowslogonaccount", $WindowsLogonAccount, "--windowslogonpassword", $WindowsLogonPassword
-          if ($RunAsAutoLogon) {
-              # Configure agent to run with autologon enabled
-              #Set-MachineForAutologon -Config $Config
-              $agentConfigArgs += "--overwriteAutoLogon", "--runAsAutoLogon"
-          } else {
-              # Configure agent to run as a service
-              $agentConfigArgs += "--runasservice"
-          }
-          
-          $agentConfigPath = Join-Path $AgentInstallPath -ChildPath 'config.cmd'
-          & $agentConfigPath $agentConfigArgs
-          
-          #$agentRunPath = Join-Path $Config.AgentInstallPath -ChildPath 'run.cmd'
-          #& $agentRunPath
+          $agentConfigCmd = "cmd.exe /C .\config.cmd --unattended --url '$AzdoUri' --auth 'pat' --token '$AzdoPat' --pool '$PoolName' --agent '$AgentName' --runAsService --windowsLogonAccount '$WindowsLogonAccount' --windowsLogonPassword '$WindowsLogonPassword'"
+          Invoke-Expression -Command $agentConfigCmd
         } finally {
           Pop-Location
         }
@@ -74,10 +59,6 @@
         WindowsLogonAccount: '{{ WindowsLogonAccount }}'
         WindowsLogonPassword: '{{ WindowsLogonPassword }}'
     register: pwsh_output
-
-  - name: Print pwsh_output
-    debug:
-      msg: "{{ pwsh_output }}"
         
   - name: Output Azure Pipelines Agent Configuration Log
     ansible.windows.win_powershell:
@@ -85,13 +66,10 @@
         $logFiles = Get-ChildItem "C:\agent\_diag\*.log"
         echo ($logFiles).FullName
     register: log_path
-
-  - name: Print log_path.output[0]
-    debug:
-      msg: "{{ log_path.output[0] }}"
         
   - name: Fetch Log File
     ansible.builtin.fetch:
       src: "{{ log_path.output[0] }}"
-      dest: "{{ inventory_hostname }}"
+      dest: "{{ inventory_hostname }}.log"
       flat: yes
+    when: log_path.output[0] != None
