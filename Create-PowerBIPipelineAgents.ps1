@@ -68,6 +68,7 @@ try {
 
     echo "Gathering terraform output"
     $tfOutput = terraform output -json | ConvertFrom-Json
+    $tfOutput
 }
 finally {
     popd
@@ -84,7 +85,7 @@ try {
     pip install pywinrm
 
 
-    echo 'Generate ansible inventory from Terraform output'
+    echo "Generate ansible inventory for Terraform created VMs: $($tfOutput.vmIps.value -join "", "")"
 
     $hosts = "[azurevms]
 $($tfOutput.vmIps.value -join ""`n"")
