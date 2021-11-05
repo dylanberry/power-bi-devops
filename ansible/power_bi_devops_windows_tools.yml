@@ -60,16 +60,51 @@
         WindowsLogonPassword: '{{ WindowsLogonPassword }}'
     register: pwsh_output
         
-  - name: Output Azure Pipelines Agent Configuration Log
+  - name: Output Azure Pipelines Agent Configuration Log Paths
     ansible.windows.win_powershell:
       script: |
         $logFiles = Get-ChildItem "C:\agent\_diag\*.log"
         echo ($logFiles).FullName
     register: log_path
         
-  - name: Fetch Log File
+  - name: Fetch Azure Pipelines Agent Configuration Logs
     ansible.builtin.fetch:
       src: "{{ log_path.output[0] }}"
       dest: "{{ inventory_hostname }}.log"
       flat: yes
     when: log_path.output[0] != None
+        
+  - name: Output Azure Pipelines Agent Configuration Log Paths
+    ansible.windows.win_powershell:
+      script: |
+        $logFiles = Get-ChildItem "C:\agent\_diag\*.log"
+        echo ($logFiles).FullName
+    register: log_path
+        
+  - name: Install pbi-tools
+    ansible.windows.win_powershell:
+      script: |
+        $pbiToolsPath = 'C:\pbi-tools'
+        $mkdirResult = mkdir $pbiToolsPath -Force
+
+        try {
+            pushd $pbiToolsPath
+            $pbiToolsUrl = "https://api.github.com/repos/action-bi-toolkit/pbi-tools/releases/latest"
+            
+            $response = Invoke-WebRequest $pbiToolsUrl -UseBasicParsing
+            $content = $response.Content | ConvertFrom-Json
+            
+            $assetResponse = Invoke-WebRequest $content.assets_url -UseBasicParsing
+            $assetContent = $assetResponse.Content | ConvertFrom-Json
+            
+            $downloadZipFile = Join-Path $pbiToolsPath -ChildPath $(Split-Path -Path $assetContent.browser_download_url -Leaf)
+            $downloadResponse = Invoke-WebRequest $assetContent.browser_download_url -OutFile $downloadZipFile -UseBasicParsing
+            
+            $expandResult = Expand-Archive $downloadZipFile -DestinationPath $pbiToolsPath -Force
+            
+            $pbiToolsCmdPath = Join-Path $pbiToolsPath -ChildPath 'pbi-tools.exe'
+            $aliasResult = Set-Alias -Name 'pbi-tools' -Value $pbiToolsCmdPath
+        }
+        finally {
+            popd
+        }
