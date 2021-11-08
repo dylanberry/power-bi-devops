@@ -1,0 +1,7 @@
+trigger: none
+
+pool: default
+
+steps:
+- script: pbi-tools
+  displayName: 'Run a one-line script'
