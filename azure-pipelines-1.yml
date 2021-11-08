@@ -5,5 +5,5 @@ pool: default
 steps:
 - checkout: none
 
-- powershell: pbi-tools
+- powershell: C:\pbi-tools\pbi-tools.exe
   displayName: 'Test Power BI Tools'
