@@ -3,5 +3,7 @@ trigger: none
 pool: default
 
 steps:
-- script: pbi-tools
-  displayName: 'Run a one-line script'
+- checkout: none
+
+- powershell: pbi-tools
+  displayName: 'Test Power BI Tools'
