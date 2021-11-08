@@ -97,8 +97,10 @@
             $assetResponse = Invoke-WebRequest $content.assets_url -UseBasicParsing
             $assetContent = $assetResponse.Content | ConvertFrom-Json
             
-            $downloadZipFile = Join-Path $pbiToolsPath -ChildPath $(Split-Path -Path $assetContent.browser_download_url -Leaf)
-            $downloadResponse = Invoke-WebRequest $assetContent.browser_download_url -OutFile $downloadZipFile -UseBasicParsing
+            $fileName = Split-Path -Path $assetContent.browser_download_url[0] -Leaf
+
+            $downloadZipFile = Join-Path $pbiToolsPath -ChildPath $fileName
+            $downloadResponse = Invoke-WebRequest $assetContent.browser_download_url[0] -OutFile $downloadZipFile -UseBasicParsing
             
             $expandResult = Expand-Archive $downloadZipFile -DestinationPath $pbiToolsPath -Force
             
