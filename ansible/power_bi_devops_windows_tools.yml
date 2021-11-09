@@ -105,7 +105,7 @@
             $expandResult = Expand-Archive $downloadZipFile -DestinationPath $pbiToolsPath -Force
             
             $pbiToolsCmdPath = Join-Path $pbiToolsPath -ChildPath 'pbi-tools.exe'
-            $aliasResult = Set-Alias -Name 'pbi-tools' -Value $pbiToolsCmdPath
+            $env:Path += ";$pbiToolsPath"
         }
         finally {
             popd

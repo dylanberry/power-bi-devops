@@ -10,12 +10,15 @@ pool: default
 steps:
 - checkout: none
 
-- powershell: Invoke-WebRequest -Uri '${{ parameters.PbixFileUrl }}' -OutFile '$(Build.BinariesDirectory)/sample.pbix'
-
 - powershell: |
-    $env:PBITOOLS_LogLevel = 'Verbose'
-    C:\pbi-tools\pbi-tools.exe extract '$(Build.BinariesDirectory)\sample.pbix'
-  displayName: 'Extract PBIX'
+    $pbixFileUrl = '${{ parameters.PbixFileUrl }}'
+    $fileName = Split-Path -Path $pbixFileUrl -Leaf
+    $pbixDownloadPath = Join-Path '$(Build.BinariesDirectory)' -ChildPath $fileName
+    Invoke-WebRequest -Uri '$pbixFileUrl  -OutFile $pbixDownloadPath
 
-- publish: '$(Build.BinariesDirectory)\sample'
-  artifact: 'sample.pbix'
+    $env:PBITOOLS_LogLevel = 'Verbose'
+    C:\pbi-tools\pbi-tools.exe extract $pbixDownloadPath
+  displayName: 'Download and Extract PBIX'
+
+- publish: '$(Build.BinariesDirectory)'
+  artifact: 'PBIX'
