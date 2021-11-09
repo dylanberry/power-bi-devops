@@ -1,3 +1,8 @@
+parameters:
+  - name: PbixFileUrl
+    type: string
+    displayName: Pbix File Url
+
 trigger: none
 
 pool: default
