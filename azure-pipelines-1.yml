@@ -10,7 +10,7 @@ pool: default
 steps:
 - checkout: none
 
-- powershell: Invoke-WebRequest -Uri 'https://github.com/microsoft/powerbi-desktop-samples/blob/main/Sample%20Reports/Sales%20%26%20Returns%20Sample%20v201912.pbix' -OutFile '$(Build.BinariesDirectory)/sample.pbix'
+- powershell: Invoke-WebRequest -Uri '${{ parameters.PbixFileUrl }}' -OutFile '$(Build.BinariesDirectory)/sample.pbix'
 
 - powershell: C:\pbi-tools\pbi-tools.exe extract '$(Build.BinariesDirectory)/sample.pbix' -extractFolder '$(Build.ArtifactStagingDirectory)' -modelSerialization Raw
   displayName: 'Test Power BI Tools'
