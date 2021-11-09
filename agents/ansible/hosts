@@ -1,0 +1,11 @@
+[azurevms]
+20.104.222.224
+20.104.223.137
+
+[azurevms:vars]
+ansible_user=pbiagentadmin
+ansible_password=IYrVj%YrbK0SeNp3
+ansible_connection=winrm
+ansible_winrm_transport=basic
+ansible_winrm_server_cert_validation=ignore
+ansible_port=5986
