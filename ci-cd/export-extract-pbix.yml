@@ -12,6 +12,8 @@ steps:
 
 - powershell: |
     $pbixFileUrl = '${{ parameters.PbixFileUrl }}'
+    
+    Add-Type -AssemblyName System.Web
     $fileName = [System.Web.HttpUtility]::UrlDecode((Split-Path -Path $pbixFileUrl -Leaf).Split('?')[0])
     $pbixDownloadPath = Join-Path '$(Build.BinariesDirectory)' -ChildPath $fileName
 
