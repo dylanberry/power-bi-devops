@@ -12,7 +12,7 @@ steps:
 
 - powershell: |
     $pbixFileUrl = '${{ parameters.PbixFileUrl }}'
-    $fileName = Split-Path -Path $pbixFileUrl -Leaf
+    $fileName = (Split-Path -Path $pbixFileUrl -Leaf).Split('?')[0]
     $pbixDownloadPath = Join-Path '$(Build.BinariesDirectory)' -ChildPath $fileName
 
     echo "Downloading $pbixFileUrl to $pbixDownloadPath"
