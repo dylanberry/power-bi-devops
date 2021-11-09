@@ -13,7 +13,7 @@ steps:
 - powershell: Invoke-WebRequest -Uri '${{ parameters.PbixFileUrl }}' -OutFile '$(Build.BinariesDirectory)/sample.pbix'
 
 - powershell: |
-    C:\pbi-tools\pbi-tools.exe extract '$(Build.BinariesDirectory)/sample.pbix' -extractFolder '$(Build.ArtifactStagingDirectory)' -modelSerialization Raw
+    C:\pbi-tools\pbi-tools.exe extract '$(Build.BinariesDirectory)\sample.pbix' -extractFolder '$(Build.ArtifactStagingDirectory)' -modelSerialization Raw
     ls '$(Build.ArtifactStagingDirectory)'
   displayName: 'Extract PBIX'
 
