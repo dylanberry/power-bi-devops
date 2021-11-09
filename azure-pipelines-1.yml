@@ -14,7 +14,7 @@ steps:
     $pbixFileUrl = '${{ parameters.PbixFileUrl }}'
     $fileName = Split-Path -Path $pbixFileUrl -Leaf
     $pbixDownloadPath = Join-Path '$(Build.BinariesDirectory)' -ChildPath $fileName
-    Invoke-WebRequest -Uri '$pbixFileUrl  -OutFile $pbixDownloadPath
+    Invoke-WebRequest -Uri $pbixFileUrl -OutFile $pbixDownloadPath
 
     $env:PBITOOLS_LogLevel = 'Verbose'
     C:\pbi-tools\pbi-tools.exe extract $pbixDownloadPath
