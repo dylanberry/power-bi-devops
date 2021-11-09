@@ -14,6 +14,7 @@ steps:
 
 - powershell: |
     cd '$(Build.ArtifactStagingDirectory)'
+    $env:PBITOOLS_LogLevel = 'Verbose'
     C:\pbi-tools\pbi-tools.exe extract '$(Build.BinariesDirectory)\sample.pbix' -extractFolder '$(Build.ArtifactStagingDirectory)' -modelSerialization Raw
     ls '$(Build.ArtifactStagingDirectory)'
   displayName: 'Extract PBIX'
