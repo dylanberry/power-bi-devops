@@ -46,6 +46,8 @@ echo "Get all reports from $WorkspaceName"
 $workspace = Get-PowerBIWorkspace -Name $WorkspaceName
 $reports = Get-PowerBIReport -WorkspaceId $workspace.Id
 
+New-Item -ItemType "directory" -Path $PbixFolderPath -Force
+
 $failedReportFilePaths = @()
 foreach ($report in $reports) {
     try {
