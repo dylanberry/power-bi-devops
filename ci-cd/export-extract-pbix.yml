@@ -23,12 +23,13 @@ steps:
     scriptType: 'pscore'
     scriptLocation: 'inlineScript'
     inlineScript: |
+      Add-Type -AssemblyName System.Web
+      
       # Input parameters
       $fileUrl = [System.Web.HttpUtility]::UrlDecode('${{ parameters.PbixFileUrl }}')
       $fullPath = '${{ parameters.PbixFileFullPath }}'
 
       echo  'Construct api url and file name'
-      Add-Type -AssemblyName System.Web
       $fileUri = [System.Uri]$fileUrl
       $relativePath = $fileUri.PathAndQuery
       $fileName = [System.Web.HttpUtility]::UrlDecode($fileUri.Segments[-1])
