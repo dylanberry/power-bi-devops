@@ -62,6 +62,7 @@ steps:
 
   - powershell: |
       $reportSourceFolderPath = '$(ReportSourceFolderPath)'
+      New-Item -ItemType "directory" -Path $reportSourceFolderPath -Force
 
       $reportFiles = Get-ChildItem -Path $reportSourceFolderPath -Recurse -Filter *.pbix
 
