@@ -24,6 +24,11 @@
     win_chocolatey:
       name: azure-cli
       state: present
+
+  - name: Install PowerShell Core
+    win_chocolatey:
+      name: powershell-core
+      state: present
         
   - name: Configure Azure Pipelines Agent
     ansible.windows.win_powershell:

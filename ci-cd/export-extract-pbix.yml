@@ -20,7 +20,7 @@ steps:
 - task: AzureCLI@2
   inputs:
     azureSubscription: '${{ parameters.ServiceConnection }}'
-    scriptType: 'ps'
+    scriptType: 'pscore'
     scriptLocation: 'inlineScript'
     inlineScript: |
       # Input parameters
