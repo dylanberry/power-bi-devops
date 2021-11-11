@@ -21,6 +21,7 @@ steps:
   inputs:
     azureSubscription: '${{ parameters.ServiceConnection }}'
     scriptType: 'pscore'
+    scriptLocation: 'inlineScript'
     inlineScript: |
       # Input parameters
       $fileUrl = [System.Web.HttpUtility]::UrlDecode('${{ parameters.PbixFileUrl }}')
