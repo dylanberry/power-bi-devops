@@ -2,6 +2,13 @@ parameters:
   - name: PbixFileUrl
     type: string
     displayName: Pbix File Url
+  - name: PbixFileFullPath
+    type: string
+    displayName: Pbix File Full Path
+  - name: ServiceConnection
+    type: string
+    displayName: Service Connection
+    default: Power Platform SharePoint
 
 trigger: none
 
@@ -10,19 +17,37 @@ pool: default
 steps:
 - checkout: none
 
-- powershell: |
-    $pbixFileUrl = '${{ parameters.PbixFileUrl }}'
-    
-    Add-Type -AssemblyName System.Web
-    $fileName = [System.Web.HttpUtility]::UrlDecode((Split-Path -Path $pbixFileUrl -Leaf).Split('?')[0])
-    $pbixDownloadPath = Join-Path '$(Build.BinariesDirectory)' -ChildPath $fileName
+- task: AzureCLI@2
+  inputs:
+    azureSubscription: '${{ parameters.ServiceConnection }}'
+    scriptType: 'pscore'
+    inlineScript: |
+      # Input parameters
+      $fileUrl = [System.Web.HttpUtility]::UrlDecode('${{ parameters.PbixFileUrl }}')
+      $fullPath = '${{ parameters.PbixFileFullPath }}'
 
-    echo "Downloading $pbixFileUrl to $pbixDownloadPath"
-    Invoke-WebRequest -Uri $pbixFileUrl -OutFile $pbixDownloadPath
+      echo  'Construct api url and file name'
+      Add-Type -AssemblyName System.Web
+      $fileUri = [System.Uri]$fileUrl
+      $relativePath = $fileUri.PathAndQuery
+      $fileName = [System.Web.HttpUtility]::UrlDecode($fileUri.Segments[-1])
+      $siteUrl = $fileUrl.Replace($fullPath, '')
+      $downloadUrl = "$($siteUrl)_api/web/GetFileByServerRelativeUrl('$relativePath')/`$value"
 
-    $env:PBITOOLS_LogLevel = 'Verbose'
-    echo "Extracting $pbixDownloadPath"
-    C:\pbi-tools\pbi-tools.exe extract $pbixDownloadPath
+      $token = az account get-access-token --resource $fileUri.Host | ConvertFrom-Json
+
+      $headers = @{
+          "Authorization" = "Bearer $($token.accessToken)";
+      }
+      
+      $pbixDownloadPath = Join-Path '$(Build.BinariesDirectory)' -ChildPath $fileName
+
+      echo "Downloading $downloadUrl to $pbixDownloadPath"
+      Invoke-WebRequest -Uri $downloadUrl -OutFile $pbixDownloadPath
+
+      $env:PBITOOLS_LogLevel = 'Verbose'
+      echo "Extracting $pbixDownloadPath"
+      C:\pbi-tools\pbi-tools.exe extract $pbixDownloadPath
   displayName: 'Download and Extract PBIX'
 
 - publish: '$(Build.BinariesDirectory)'
