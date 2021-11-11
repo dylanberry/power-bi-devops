@@ -40,7 +40,7 @@ steps:
     azureSubscription: '${{ parameters.ServiceConnection }}'
     scriptType: 'pscore'
     scriptLocation: 'scriptPath'
-    scriptPath: 'Create-PowerBIPipelineAgents.ps1'
+    scriptPath: 'agents/Create-PowerBIPipelineAgents.ps1'
     arguments: '-AzdoUri "$(System.TeamFoundationCollectionUri)" -Location "$(location)" -BackendResourceGroupName "$(backendResourceGroupName)" -BackendStorageAccountName "$(backendStorageAccountName)" -BackendStorageContainerName "$(backendStorageAccountContainerName)" -VmResourceGroupName "$(vmResourceGroupName)"'
     addSpnToEnvironment: true
     failOnStandardError: false
