@@ -85,7 +85,7 @@
         $logFiles = Get-ChildItem "C:\agent\_diag\*.log"
         echo ($logFiles).FullName
     register: log_path
-        
+
   - name: Install pbi-tools
     ansible.windows.win_powershell:
       script: |
@@ -115,3 +115,7 @@
         finally {
             popd
         }
+
+  - name: Refresh PowerShell Environment
+    ansible.windows.win_powershell:
+      script: refreshenv
