@@ -15,7 +15,7 @@ trigger: none
 pool: default
 
 steps:
-- powershell: Remove-Item '$(Build.BinariesDirectory)' -Recurse -Force
+- powershell: Get-ChildItem -Path '$(Build.BinariesDirectory)' -File -Recurse | Remove-Item -Force
 - checkout: none
 
 - task: AzureCLI@2
