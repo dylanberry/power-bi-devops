@@ -65,5 +65,3 @@ if ($failedReportFilePaths.Length -gt 0) {
     $failedReportFilePathsString = $failedReportFilePaths -join '`n'
     throw "The following pbix files failed to import: $failedReportFilePathsString"
 }
-
-C:\pbi-tools\pbi-tools.exe extract $pbixDownloadPath
