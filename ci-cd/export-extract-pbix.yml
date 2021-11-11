@@ -30,11 +30,11 @@ steps:
       $fullPath = '${{ parameters.PbixFileFullPath }}'
 
       echo  'Construct api url and file name'
+      $siteUrl = [System.Web.HttpUtility]::UrlDecode($fileUrl).Replace($fullPath, '')
       $fileUri = [System.Uri]$fileUrl
       $relativePath = $fileUri.PathAndQuery
-      $fileName = [System.Web.HttpUtility]::UrlDecode($fileUri.Segments[-1])
-      $siteUrl = $fileUrl.Replace($fullPath, '')
       $downloadUrl = "$($siteUrl)_api/web/GetFileByServerRelativeUrl('$relativePath')/`$value"
+      $fileName = [System.Web.HttpUtility]::UrlDecode($fileUri.Segments[-1])
 
       $scope = "https://$($fileUri.Host)"
       echo "Obtaining token for scope $scope"
@@ -47,7 +47,7 @@ steps:
       $pbixDownloadPath = Join-Path '$(Build.BinariesDirectory)' -ChildPath $fileName
 
       echo "Downloading $downloadUrl to $pbixDownloadPath"
-      Invoke-WebRequest -Uri $downloadUrl -OutFile $pbixDownloadPath -Verbose
+      Invoke-WebRequest -Uri $downloadUrl -Headers $headers -OutFile $pbixDownloadPath -Verbose
 
       $env:PBITOOLS_LogLevel = 'Verbose'
       echo "Extracting $pbixDownloadPath"
