@@ -24,7 +24,7 @@ steps:
     scriptLocation: 'inlineScript'
     inlineScript: |
       Add-Type -AssemblyName System.Web
-      
+
       # Input parameters
       $fileUrl = [System.Web.HttpUtility]::UrlDecode('${{ parameters.PbixFileUrl }}')
       $fullPath = '${{ parameters.PbixFileFullPath }}'
@@ -36,7 +36,9 @@ steps:
       $siteUrl = $fileUrl.Replace($fullPath, '')
       $downloadUrl = "$($siteUrl)_api/web/GetFileByServerRelativeUrl('$relativePath')/`$value"
 
-      $token = az account get-access-token --resource $fileUri.Host | ConvertFrom-Json
+      $scope = "https://$($fileUri.Host)"
+      echo "Obtaining token for scope $scope"
+      $token = az account get-access-token --resource $scope | ConvertFrom-Json
 
       $headers = @{
           "Authorization" = "Bearer $($token.accessToken)";
