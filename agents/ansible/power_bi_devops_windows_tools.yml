@@ -116,6 +116,6 @@
             popd
         }
 
-  - name: Refresh PowerShell Environment
+  - name: Restart
     ansible.windows.win_powershell:
-      script: refreshenv
+      script: Restart-Computer
