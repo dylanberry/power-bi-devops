@@ -47,7 +47,7 @@ steps:
       $pbixDownloadPath = Join-Path '$(Build.BinariesDirectory)' -ChildPath $fileName
 
       echo "Downloading $downloadUrl to $pbixDownloadPath"
-      Invoke-WebRequest -Uri $downloadUrl -OutFile $pbixDownloadPath
+      Invoke-WebRequest -Uri $downloadUrl -OutFile $pbixDownloadPath -Verbose
 
       $env:PBITOOLS_LogLevel = 'Verbose'
       echo "Extracting $pbixDownloadPath"
