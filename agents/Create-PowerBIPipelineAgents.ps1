@@ -42,7 +42,7 @@ $env:ARM_TENANT_ID = $env:tenantId
 
 try {
     echo "Changing to terraform directory"
-    pushd terraform
+    pushd "$PSScriptRoot/terraform"
     $backendStateFileName = "$VmResourceGroupName.terraform.tfstate"    
     
 
@@ -77,7 +77,7 @@ finally {
 
 try {
     echo "Changing to ansible directory"
-    pushd ansible
+    pushd "$PSScriptRoot/ansible"
 
 
     echo "Installing ansible"
