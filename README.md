@@ -27,8 +27,19 @@ There are 2 major pieces:
 
 ## Setup and Usage
 
+You can use these tools in 2 ways:
+
+1. Any Windows pipeline agent - the export/import process can be performed on Windows agent which has chocolatey installed. In this case, PowerBI is installed for every pipeline run and can take 5+ minutes depending on the agent.
+1. Specific Windows pipeline agents - you can preconfigure agents with PowerBI and pbi-tools which saves time on each run.
+
 ### Prerequisites
 
 1. Azure RM Service Connection
 1. Variable Group + PAT (currently hardcoded to `group: AgentPoolAdmin` and `$(PAT)`)
 1. SharePoint app-only access (https://docs.microsoft.com/en-us/sharepoint/dev/solution-guidance/security-apponly-azuread)
+
+## Other Resources
+
+- https://github.com/microsoft/powerbi-desktop-samples/tree/main/Sample%20Reports
+- https://powerbi.microsoft.com/en-us/blog/use-power-bi-api-with-service-principal-preview/
+- https://docs.microsoft.com/en-us/powershell/power-bi/overview?view=powerbi-ps
