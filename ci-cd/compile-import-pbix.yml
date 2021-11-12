@@ -81,12 +81,13 @@ steps:
       }
     displayName: Compile PBIX Files
 
-  - publish: $(PbixFolderPath)
-    artifact: 'PBIX'
-
   - task: PowerShell@2
     inputs:
       filePath: '$(Build.SourcesDirectory)/ci-cd/Import-PowerBIReports.ps1'
       arguments: '-TenantId ''$(TenantId)'' -ClientId ''$(ClientId)'' -ClientSecret ''$(ClientSecret)'' -WorkspaceName ''${{ parameters.WorkspaceName }}'' -PbixFolderPath ''$(PbixFolderPath)'''
       showWarnings: true
     displayName: 'Import PBIX Files'
+
+  - publish: $(PbixFolderPath)
+    artifact: 'PBIX'
+    condition: always()
