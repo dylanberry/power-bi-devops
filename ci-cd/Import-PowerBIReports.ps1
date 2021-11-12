@@ -45,15 +45,12 @@ echo "Authenticated as $($account.UserName) within tenant $($account.TenantId) (
 echo 'Create Workspace if it does not already exist'
 $workspace = Get-PowerBIWorkspace -Name $WorkspaceName
 
-if($workspace) {
-    echo "The workspace named >$WorkspaceName< already exists!"
-}
-else {
-    echo "Creating new workspace named >$WorkspaceName<"
+if(!$workspace) {
+    echo "Creating new workspace $WorkspaceName"
     $workspace = New-PowerBIWorkspace -Name $WorkspaceName
 }
 
-$reportFilePaths = gci $ReportFolderPath -Filter *.pbix -File | Select FullName
+$reportFilePaths = gci $PbixFolderPath -Filter *.pbix -File | Select FullName
 $failedReportFilePaths = @()
 foreach($reportFilePath in $reportFilePaths) {
     try {
