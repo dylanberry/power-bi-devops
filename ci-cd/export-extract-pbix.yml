@@ -61,7 +61,6 @@ steps:
     displayName: Download and Install PBI Tools
 
   - powershell: |
-      echo $env:Path
       $pbixFolderPath = '$(PbixFolderPath)'
       $reportSourceFolderPath = '$(ReportSourceFolderPath)'
       New-Item -ItemType "directory" -Path $reportSourceFolderPath -Force
@@ -76,7 +75,7 @@ steps:
       $reportFiles = Get-ChildItem -Path $pbixFolderPath -Recurse -Filter *.pbix
 
       foreach ($reportFile in $reportFiles) {
-        echo "Extracting $reportFile"
-        pbi-tools extract $reportFile
+          echo "Extracting $($reportFile.FullName)"
+          pbi-tools extract $reportFile.FullName
       }
     displayName: Extract PBIX Files
