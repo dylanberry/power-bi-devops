@@ -75,7 +75,7 @@ steps:
           echo "Compiling $($reportSourceFolder.Name)"
           pbi-tools compile-pbix $reportSourceFolder.FullName
 
-          $compiledPbixFilePath = Join-Path $reportSourceFolder.FullName -ChildPath '.pbix'
+          $compiledPbixFilePath = Join-Path '$(Build.SourcesDirectory)' -ChildPath '$($reportSourceFolder.Name).pbix'
           echo "Moving compiled PBIX file from $compiledPbixFilePath to $pbixFolderPath"
           Move-Item $compiledPbixFilePath $pbixFolderPath
       }
