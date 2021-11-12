@@ -42,7 +42,7 @@ $account = Connect-PowerBIServiceAccount -Tenant $TenantId -Credential $powerBiC
 echo "Authenticated as $($account.UserName) within tenant $($account.TenantId) (env = $($account.Environment))"
 
 
-echo 'Create Workspace if it does not already exist'
+echo "Get workspace $WorkspaceName"
 $workspace = Get-PowerBIWorkspace -Name $WorkspaceName
 
 if(!$workspace) {
@@ -54,8 +54,8 @@ $reportFilePaths = gci $PbixFolderPath -Filter *.pbix -File | Select FullName
 $failedReportFilePaths = @()
 foreach($reportFilePath in $reportFilePaths) {
     try {
-        echo "Uploading report $reportFilePath"
-        New-PowerBIReport -Path $reportFilePath -WorkspaceId $workspace.Id -ConflictAction CreateOrOverwrite -ErrorAction Stop
+        echo "Uploading report $($reportFilePath.FullName)"
+        New-PowerBIReport -Path $reportFilePath.FullName -WorkspaceId $workspace.Id -ConflictAction CreateOrOverwrite -ErrorAction Stop
     }
     catch {
         Resolve-PowerBIError -Last
