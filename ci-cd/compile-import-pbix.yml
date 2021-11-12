@@ -60,7 +60,7 @@ steps:
   - powershell: |
       $pbixFolderPath = '$(PbixFolderPath)'
       $reportSourceFolderPath = '$(ReportSourceFolderPath)'
-      New-Item -ItemType "directory" -Path $reportSourceFolderPath -Force
+      New-Item -ItemType "directory" -Path $pbixFolderPath -Force
 
       $pbiToolsPath = '$(Agent.ToolsDirectory)\pbi-tools'
       $env:Path += ";$pbiToolsPath"
