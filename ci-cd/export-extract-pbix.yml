@@ -9,13 +9,20 @@ pool:
   vmImage: windows-latest
 
 variables:
-- group: PowerBI
-- name: PbixFolderPath
-  value: '$(Build.BinariesDirectory)/pbix'
-- name: ReportSourceFolderPath
-  value: '$(Build.SourcesDirectory)/src/' 
+  - group: PowerBI
+  - name: PbixFolderPath
+    value: '$(Build.BinariesDirectory)/pbix'
+  - name: ReportSourceFolderPath
+    value: '$(Build.SourcesDirectory)/src/'
+  - name: Common.SolutionExportBranchName
+    value: 'workspace-${{ parameters.WorkspaceName }}-export-$(Build.BuildId)'
+  - name: Common.SourceBranchName
+    value: $[ replace('$(Build.SourceBranch)', 'refs/heads/', '') ]
 
 steps:
+
+  - checkout: self
+    persistCredentials: True
 
   - task: PowerShell@2
     inputs:
@@ -78,4 +85,24 @@ steps:
           echo "Extracting $($reportFile.FullName)"
           pbi-tools extract $reportFile.FullName
       }
+      gci -Path $pbixFolderPath -Directory | % { Move-Item $_ '$(Build.SourcesDirectory)' }
     displayName: Extract PBIX Files
+
+  - powershell: |
+      cd $(Build.SourcesDirectory)
+
+      git config user.email "export.pipeline@dev.azure.com"
+      git config user.name "Export Pipeline"
+
+      git fetch origin
+      git checkout $(Common.SourceBranchName)
+      git switch -c $(Common.SolutionExportBranchName)
+      git branch -u origin/$(Common.SolutionExportBranchName)
+
+      git pull
+
+      git add --all
+      git commit -m "${{ parameters.WorkspaceName }} $(Build.BuildId)"
+
+      git push --set-upstream origin $(Common.SolutionExportBranchName)
+    displayName: Commit Exported Solution(s)
