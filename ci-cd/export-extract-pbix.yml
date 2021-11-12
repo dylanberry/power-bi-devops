@@ -85,7 +85,9 @@ steps:
           echo "Extracting $($reportFile.FullName)"
           pbi-tools extract $reportFile.FullName
       }
-      gci -Path $pbixFolderPath -Directory | % { Move-Item $_ '$(ReportSourceFolderPath)' }
+
+      echo "Moving PBIX Folder $pbixFolderPath to $reportSourceFolderPath"
+      Get-ChildItem -Path $pbixFolderPath -Directory | % { Move-Item $_ $reportSourceFolderPath }
     displayName: Extract PBIX Files
 
   - powershell: |
