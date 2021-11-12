@@ -73,7 +73,7 @@ steps:
 
       foreach ($reportSourceFolder in $reportSourceFolders) {
           echo "Compiling $($reportSourceFolder.Name)"
-          pbi-tools compile-pbix $reportSourceFolder.FullName --format PBIT
+          pbi-tools compile-pbix $reportSourceFolder.FullName -format PBIT
 
           $compiledPbixFilePath = Join-Path '$(Build.SourcesDirectory)' -ChildPath "$($reportSourceFolder.Name).pbit"
           echo "Moving compiled PBIT file from $compiledPbixFilePath to $pbixFolderPath"
