@@ -61,10 +61,11 @@ steps:
     artifact: 'PBIX'
 
   - powershell: |
+      $pbixFolderPath = '$(PbixFolderPath)'
       $reportSourceFolderPath = '$(ReportSourceFolderPath)'
       New-Item -ItemType "directory" -Path $reportSourceFolderPath -Force
 
-      $reportFiles = Get-ChildItem -Path $reportSourceFolderPath -Recurse -Filter *.pbix
+      $reportFiles = Get-ChildItem -Path $pbixFolderPath -Recurse -Filter *.pbix
 
       foreach ($reportFile in $reportFiles) {
         echo "Extracting $reportFile"
