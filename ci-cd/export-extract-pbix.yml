@@ -11,7 +11,7 @@ pool:
 variables:
   - group: PowerBI
   - name: PbixFolderPath
-    value: '$(Build.BinariesDirectory)/pbix'
+    value: '$(Build.BinariesDirectory)/pbix/'
   - name: ReportSourceFolderPath
     value: '$(Build.SourcesDirectory)/src/'
   - name: Common.WorkspaceExportBranchName
@@ -85,7 +85,7 @@ steps:
           echo "Extracting $($reportFile.FullName)"
           pbi-tools extract $reportFile.FullName
       }
-      gci -Path $pbixFolderPath -Directory | % { Move-Item $_ '$(Build.SourcesDirectory)' }
+      gci -Path $pbixFolderPath -Directory | % { Move-Item $_ '$(ReportSourceFolderPath)' }
     displayName: Extract PBIX Files
 
   - powershell: |
