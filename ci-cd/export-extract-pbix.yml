@@ -91,7 +91,7 @@ steps:
       
       foreach ($extractedPbixFolderPath in $extractedPbixFolderPaths) {
           echo "Moving $($extractedPbixFolderPath.FullPath) to $reportSourceFolderPath"
-          Move-Item $extractedPbixFolderPathFullPath $reportSourceFolderPath
+          Move-Item $extractedPbixFolderPath.FullPath $reportSourceFolderPath
       }
     displayName: Extract PBIX Files
 
