@@ -17,6 +17,16 @@ variables:
 
 steps:
 
+  - task: PowerShell@2
+    inputs:
+      filePath: '$(Build.SourcesDirectory)/ci-cd/Export-PowerBIReports.ps1'
+      arguments: '-TenantId ''$(TenantId)'' -ClientId ''$(ClientId)'' -ClientSecret ''$(ClientSecret)'' -WorkspaceName ''${{ parameters.WorkspaceName }}'' -PbixFolderPath ''$(PbixFolderPath)'''
+      showWarnings: true
+    displayName: 'Export PBIX Files'
+
+  - publish: $(PbixFolderPath)
+    artifact: 'PBIX'
+
   - powershell: choco install PowerBI
     displayName: Install PowerBI
 
@@ -50,25 +60,19 @@ steps:
       }
     displayName: Download and Install PBI Tools
 
-  - task: PowerShell@2
-    inputs:
-      filePath: '$(Build.SourcesDirectory)/ci-cd/Export-PowerBIReports.ps1'
-      arguments: '-TenantId ''$(TenantId)'' -ClientId ''$(ClientId)'' -ClientSecret ''$(ClientSecret)'' -WorkspaceName ''${{ parameters.WorkspaceName }}'' -PbixFolderPath ''$(PbixFolderPath)'''
-      showWarnings: true
-    displayName: 'Export PBIX Files'
-
-  - publish: $(PbixFolderPath)
-    artifact: 'PBIX'
-
   - powershell: |
+      echo $env:Path
       $pbixFolderPath = '$(PbixFolderPath)'
       $reportSourceFolderPath = '$(ReportSourceFolderPath)'
       New-Item -ItemType "directory" -Path $reportSourceFolderPath -Force
+
+      $pbiToolsPath = '$(Agent.ToolsDirectory)\pbi-tools'
+      $pbiToolsCmdPath = Join-Path $pbiToolsPath -ChildPath 'pbi-tools.exe'
 
       $reportFiles = Get-ChildItem -Path $pbixFolderPath -Recurse -Filter *.pbix
 
       foreach ($reportFile in $reportFiles) {
         echo "Extracting $reportFile"
-        pbi-tools extract $reportFile
+        $pbiToolsCmdPath extract $reportFile
       }
     displayName: Extract PBIX Files
