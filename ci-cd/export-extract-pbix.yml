@@ -87,7 +87,12 @@ steps:
       }
 
       echo "Moving PBIX Folder $pbixFolderPath to $reportSourceFolderPath"
-      Get-ChildItem -Path $pbixFolderPath -Directory | % { Move-Item $_ $reportSourceFolderPath }
+      $extractedPbixFolderPaths = Get-ChildItem -Path $pbixFolderPath -Directory
+      
+      foreach ($extractedPbixFolderPath in $extractedPbixFolderPaths) {
+          echo "Moving $extractedPbixFolderPath to $reportSourceFolderPath"
+          Move-Item $extractedPbixFolderPath $reportSourceFolderPath
+      }
     displayName: Extract PBIX Files
 
   - powershell: |
