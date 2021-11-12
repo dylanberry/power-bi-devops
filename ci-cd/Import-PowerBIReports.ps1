@@ -50,7 +50,7 @@ if(!$workspace) {
     $workspace = New-PowerBIWorkspace -Name $WorkspaceName
 }
 
-$reportFilePaths = gci $PbixFolderPath -Filter *.pbix -File | Select FullName
+$reportFilePaths = gci $PbixFolderPath -Filter *.pbi* -File | Select FullName
 $failedReportFilePaths = @()
 foreach($reportFilePath in $reportFilePaths) {
     try {

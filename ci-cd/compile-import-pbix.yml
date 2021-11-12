@@ -73,21 +73,21 @@ steps:
 
       foreach ($reportSourceFolder in $reportSourceFolders) {
           echo "Compiling $($reportSourceFolder.Name)"
-          pbi-tools compile-pbix $reportSourceFolder.FullName
+          pbi-tools compile-pbix $reportSourceFolder.FullName --format PBIT
 
-          $compiledPbixFilePath = Join-Path '$(Build.SourcesDirectory)' -ChildPath "$($reportSourceFolder.Name).pbix"
-          echo "Moving compiled PBIX file from $compiledPbixFilePath to $pbixFolderPath"
+          $compiledPbixFilePath = Join-Path '$(Build.SourcesDirectory)' -ChildPath "$($reportSourceFolder.Name).pbit"
+          echo "Moving compiled PBIT file from $compiledPbixFilePath to $pbixFolderPath"
           Move-Item $compiledPbixFilePath $pbixFolderPath
       }
-    displayName: Compile PBIX Files
+    displayName: Compile PBIT Files
 
   - task: PowerShell@2
     inputs:
       filePath: '$(Build.SourcesDirectory)/ci-cd/Import-PowerBIReports.ps1'
       arguments: '-TenantId ''$(TenantId)'' -ClientId ''$(ClientId)'' -ClientSecret ''$(ClientSecret)'' -WorkspaceName ''${{ parameters.WorkspaceName }}'' -PbixFolderPath ''$(PbixFolderPath)'''
       showWarnings: true
-    displayName: 'Import PBIX Files'
+    displayName: 'Import PBIT Files'
 
   - publish: $(PbixFolderPath)
-    artifact: 'PBIX'
+    artifact: 'PBIT'
     condition: always()
