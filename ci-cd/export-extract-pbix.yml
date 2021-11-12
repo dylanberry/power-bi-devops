@@ -14,7 +14,7 @@ variables:
     value: '$(Build.BinariesDirectory)/pbix'
   - name: ReportSourceFolderPath
     value: '$(Build.SourcesDirectory)/src/'
-  - name: Common.SolutionExportBranchName
+  - name: Common.WorkspaceExportBranchName
     value: 'workspace-${{ parameters.WorkspaceName }}-export-$(Build.BuildId)'
   - name: Common.SourceBranchName
     value: $[ replace('$(Build.SourceBranch)', 'refs/heads/', '') ]
@@ -96,13 +96,13 @@ steps:
 
       git fetch origin
       git checkout $(Common.SourceBranchName)
-      git switch -c $(Common.SolutionExportBranchName)
-      git branch -u origin/$(Common.SolutionExportBranchName)
+      git switch -c $(Common.WorkspaceExportBranchName)
+      git branch -u origin/$(Common.WorkspaceExportBranchName)
 
       git pull
 
       git add --all
       git commit -m "${{ parameters.WorkspaceName }} $(Build.BuildId)"
 
-      git push --set-upstream origin $(Common.SolutionExportBranchName)
-    displayName: Commit Exported Solution(s)
+      git push --set-upstream origin $(Common.WorkspaceExportBranchName)
+    displayName: Commit Exported Workspace
