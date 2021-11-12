@@ -67,12 +67,16 @@ steps:
       New-Item -ItemType "directory" -Path $reportSourceFolderPath -Force
 
       $pbiToolsPath = '$(Agent.ToolsDirectory)\pbi-tools'
+      $env:Path += ";$pbiToolsPath"
       $pbiToolsCmdPath = Join-Path $pbiToolsPath -ChildPath 'pbi-tools.exe'
+      echo "pbi-tools command path $pbiToolsCmdPath"
+
+      $env:PBITOOLS_LogLevel = 'Verbose'
 
       $reportFiles = Get-ChildItem -Path $pbixFolderPath -Recurse -Filter *.pbix
 
       foreach ($reportFile in $reportFiles) {
         echo "Extracting $reportFile"
-        $pbiToolsCmdPath extract $reportFile
+        pbi-tools extract $reportFile
       }
     displayName: Extract PBIX Files
