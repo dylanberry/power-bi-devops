@@ -84,14 +84,10 @@ steps:
       foreach ($reportFile in $reportFiles) {
           echo "Extracting $($reportFile.FullName)"
           pbi-tools extract $reportFile.FullName
-      }
 
-      echo "Moving PBIX Folder $pbixFolderPath to $reportSourceFolderPath"
-      $extractedPbixFolderPaths = Get-ChildItem -Path $pbixFolderPath -Directory
-      
-      foreach ($extractedPbixFolderPath in $extractedPbixFolderPaths) {
-          echo "Moving $($extractedPbixFolderPath.FullPath) to $reportSourceFolderPath"
-          Move-Item $extractedPbixFolderPath.FullPath $reportSourceFolderPath
+          $extractedPbixFolderPath = Join-Path $pbixFolderPath -ChildPath $reportFile.BaseName
+          echo "Moving extracted PBIX Folder from $extractedPbixFolderPath to $reportSourceFolderPath"
+          Move-Item $extractedPbixFolderPath $reportSourceFolderPath
       }
     displayName: Extract PBIX Files
 
