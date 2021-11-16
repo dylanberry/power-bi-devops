@@ -1,24 +1,20 @@
 [CmdletBinding()]
 param (
-    [Parameter()]
-    [string]
-    $TenantId,
 
-    [Parameter()]
-    [string]
-    $ClientId,
+    [Parameter(Mandatory=$true)]
+    [string]$TenantId,
 
-    [Parameter()]
-    [string]
-    $ClientSecret,
+    [Parameter(Mandatory=$true)]
+    [string]$ClientId,
 
-    [Parameter()]
-    [string]
-    $WorkspaceName,
+    [Parameter(Mandatory=$true)]
+    [string]$ClientSecret,
 
-    [Parameter()]
-    [string]
-    $PbixFolderPath
+    [Parameter(Mandatory=$true)]
+    [string]$WorkspaceName,
+
+    [Parameter(Mandatory=$true)]
+    [string]$PbixFolderPath
 )
 
 If(-not(Get-InstalledModule MicrosoftPowerBIMgmt.Profile -ErrorAction silentlycontinue)) {

@@ -15,8 +15,10 @@ The basic workflow allows
 ### Build/Deploy
 
 1. The report deployment pipeline is queued in Azure DevOps
+1. The Tabular Model Scripting Language (TMSL) dataset file is deployed via the XMLA endpoints
 1. The extracted report source code is compiled into a pbix
 1. The pbix file is uploaded to the target environment
+1. The report is rebound to the dataset and the datasource credentials are updated
 
 ## How does it work?
 
