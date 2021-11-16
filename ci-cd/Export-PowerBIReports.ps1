@@ -42,9 +42,9 @@ $account = Connect-PowerBIServiceAccount -Tenant $TenantId -Credential $powerBiC
 echo "Authenticated as $($account.UserName) within tenant $($account.TenantId) (env = $($account.Environment))"
 
 
-echo "Get all reports from $WorkspaceName"
+echo "Get reports from $WorkspaceName where name does not contain dataset"
 $workspace = Get-PowerBIWorkspace -Name $WorkspaceName
-$reports = Get-PowerBIReport -WorkspaceId $workspace.Id
+$reports = Get-PowerBIReport -WorkspaceId $workspace.Id | ? Name -notlike "*Dataset*"
 
 New-Item -ItemType "directory" -Path $PbixFolderPath -Force
 
