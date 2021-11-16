@@ -13,45 +13,47 @@ param(
     [string]$WorkspaceName
 )
 
+$ErrorActionPreference = 'Stop'
+
 az login --allow-no-subscriptions --service-principal --username $ClientId --password $ClientSecret --tenant $TenantId
 #az login
 
 $resource = 'https://analysis.windows.net/powerbi/api'
 $token = az account get-access-token --resource $resource | ConvertFrom-Json
+
 $authToken = $token.accessToken
+$headers = @{"Authorization"="Bearer $authToken"}
 
-$groupFilter = "name eq '$EnvironmentName'"
+$baseUri = "https://api.powerbi.com/v1.0/myorg"
 
-echo "Get workspace $EnvironmentName"
-$groups = Invoke-RestMethod -Method GET -Uri "https://api.powerbi.com/v1.0/myorg/groups?`$filter=$groupFilter" `
-    -Headers @{"Authorization"="Bearer $authToken"}
-$groups.value
+$groupFilter = "name eq '$WorkspaceName'"
+
+echo "Get workspace $WorkspaceName"
+$groups = Invoke-RestMethod -Method GET -Uri "$baseUri/groups?`$filter=$groupFilter" `
+    -Headers $headers
 
 echo "Get datasets"
-$dataSets = Invoke-RestMethod -Method GET -Uri "https://api.powerbi.com/v1.0/myorg/groups/$($groups.value[0].id)/datasets" `
-    -Headers @{"Authorization"="Bearer $authToken"}
-$dataSets.value
+$dataSets = Invoke-RestMethod -Method GET -Uri "$baseUri/groups/$($groups.value[0].id)/datasets" `
+    -Headers $headers
 
 echo "Get reports"
-$reports = Invoke-RestMethod -Method GET -Uri "https://api.powerbi.com/v1.0/myorg/groups/$($groups.value[0].id)/reports" `
-    -Headers @{"Authorization"="Bearer $authToken"}
-$reports.value
+$reports = Invoke-RestMethod -Method GET -Uri "$baseUri/groups/$($groups.value[0].id)/reports" `
+    -Headers $headers
 
 echo "Rebind reports to datasets"
 $datasetJson = @{ "datasetId"="$($dataSets.value[0].id)" } | ConvertTo-Json -Compress
 
-Invoke-RestMethod -Method POST -Uri "https://api.powerbi.com/v1.0/myorg/groups/$($groups.value[0].id)/reports/$($reports.value[0].id)/Rebind" `
-    -Headers @{ "Authorization"="Bearer $authToken" } `
+Invoke-RestMethod -Method POST -Uri "$baseUri/groups/$($groups.value[0].id)/reports/$($reports.value[0].id)/Rebind" `
+    -Headers $headers `
     -Body $datasetJson -ContentType 'application/json' -Verbose
 
 echo "Rebind reports to datasets"
-$datasources = Invoke-RestMethod -Method GET -Uri "https://api.powerbi.com/v1.0/myorg/groups/$($groups.value[0].id)/datasets/$($dataSets.value[0].id)/datasources" `
-    -Headers @{"Authorization"="Bearer $authToken"}
-$datasources.value
+$datasources = Invoke-RestMethod -Method GET -Uri "$baseUri/groups/$($groups.value[0].id)/datasets/$($dataSets.value[0].id)/datasources" `
+    -Headers $headers
 
 foreach ($datasource in $datasources.value) {
-  Invoke-RestMethod -Method GET -Uri "https://api.powerbi.com/v1.0/myorg/gateways/$($datasource.gatewayId)/datasources/$($datasource.datasourceId)" `
-    -Headers @{"Authorization"="Bearer $authToken"} -Verbose
+  Invoke-RestMethod -Method GET -Uri "$baseUri/gateways/$($datasource.gatewayId)/datasources/$($datasource.datasourceId)" `
+    -Headers $headers -Verbose
 
   echo 'Update datasource credentials'
   $credentialJson = @{
@@ -66,7 +68,7 @@ foreach ($datasource in $datasources.value) {
   } | ConvertTo-Json -Compress
 
   echo $credentialJson
-  Invoke-RestMethod -Method PATCH -Uri "https://api.powerbi.com/v1.0/myorg/gateways/$($datasource.gatewayId)/datasources/$($datasource.datasourceId)" `
-    -Headers @{ "Authorization"="Bearer $authToken" } `
+  Invoke-RestMethod -Method PATCH -Uri "$baseUri/gateways/$($datasource.gatewayId)/datasources/$($datasource.datasourceId)" `
+    -Headers $headers `
     -Body $credentialJson -ContentType 'application/json' -Verbose
 }

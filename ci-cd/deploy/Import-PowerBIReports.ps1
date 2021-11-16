@@ -34,17 +34,8 @@ $powerBiCredentials = New-Object System.Management.Automation.PSCredential $Clie
 
 $account = Connect-PowerBIServiceAccount -Tenant $TenantId -Credential $powerBiCredentials -ServicePrincipal
 
-
-echo "Authenticated as $($account.UserName) within tenant $($account.TenantId) (env = $($account.Environment))"
-
-
 echo "Get workspace $WorkspaceName"
 $workspace = Get-PowerBIWorkspace -Name $WorkspaceName
-
-if(!$workspace) {
-    echo "Creating new workspace $WorkspaceName"
-    $workspace = New-PowerBIWorkspace -Name $WorkspaceName
-}
 
 $reportFilePaths = gci $PbixFolderPath -Filter *.pbi* -File | Select FullName
 $failedReportFilePaths = @()

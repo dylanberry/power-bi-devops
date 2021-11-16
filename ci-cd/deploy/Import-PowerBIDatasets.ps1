@@ -22,16 +22,34 @@ Import-Module -Name SqlServer
 
 $connectionString = "Datasource=powerbi://api.powerbi.com/v1.0/$TenantId/$WorkspaceName;User ID=app:$ClientId@$TenantId;Password=$ClientSecret"
 
-$datasetFilePaths = gci $BimFolderPath -Filter *.bim -File | Select FullName
+$datasetFilePaths = gci $BimFolderPath -Filter *.bim -File | Select FullName, Name
 $failedFilePaths = @()
 foreach($datasetFilePath in $datasetFilePaths) {
     try {
-        echo "Uploading dataset $($datasetFilePath.FullName)"
-        Invoke-ASCmd -ConnectionString $connectionString -InputFile $datasetFilePath.FullName
+        echo "Coverting bim to tsml"
+        $datasetName = $datasetFilePath.Name.Replace('.bim', '')
+        $bimFilePath = $datasetFilePath.FullName
+        $tsmlFilePath = $datasetFilePath.FullName.Replace('.bim', '.tmsl')
+
+        $bimFileContent = Get-Content $bimFilePath | ConvertFrom-Json
+
+        $tmsl = @{"createOrReplace" = [Ordered]@{}}
+        $tmsl.createOrReplace += @{ "object" = @{
+                "database" = $datasetName
+            }}
+        $tmsl.createOrReplace += @{ "database" = [Ordered]@{
+                "name" = $datasetName
+                "compatibilityLevel" = 1550
+            }}
+        $tmsl.createOrReplace.database += @{ "model" = $bimFileContent.model }
+        $tmsl | ConvertTo-Json -Depth 100 | Out-File $tsmlFilePath
+
+        echo "Uploading dataset $tsmlFilePath"
+        Invoke-ASCmd -ConnectionString $connectionString -InputFile $tsmlFilePath
     }
     catch {
-        Resolve-PowerBIError -Last
         $failedFilePaths += $datasetFilePath
+        throw
     }
 }
 
