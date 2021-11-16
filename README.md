@@ -8,9 +8,12 @@ The basic workflow allows
 
 ### Export
 
-1. Report author saves the report to SharePoint
-1. Power Automate flow triggers and runs an Azure DevOps pipeline, passing the report (pbix) url as a parameter
-1. Azure DevOps downloads the file, extracts the pbix and commits the extracted source code to git
+1. Report author builds reports and datasets in a deveopment environment
+1. Azure DevOps :
+    1. Exports datasets as `.bim` files (json/TMSL)
+    1. Exports reports as `.pbix` files (binary)
+    1. Extracts the pbix contents (json + xml)
+    1. Commits the exported/extracted source code to git
 
 ### Build/Deploy
 
