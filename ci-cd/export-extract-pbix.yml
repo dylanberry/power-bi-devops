@@ -34,7 +34,7 @@ steps:
   - publish: $(PbixFolderPath)
     artifact: 'PBIX'
 
-  - powershell: choco install PowerBI
+  - powershell: choco install PowerBI -ignore-checksums
     displayName: Install PowerBI
 
   - powershell: |
