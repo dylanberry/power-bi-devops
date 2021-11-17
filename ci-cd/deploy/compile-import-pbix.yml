@@ -10,10 +10,12 @@ pool:
 
 variables:
   - group: PowerBI
-  - name: PbixFolderPath
-    value: '$(Build.BinariesDirectory)/pbix/'
   - name: ReportSourceFolderPath
     value: '$(Build.SourcesDirectory)/src/'
+  - name: BimFolderPath
+    value: '$(Build.BinariesDirectory)/bim/'
+  - name: PbixFolderPath
+    value: '$(Build.BinariesDirectory)/pbix/'
   - name: Common.WorkspaceExportBranchName
     value: 'workspace-${{ parameters.WorkspaceName }}-export-$(Build.BuildId)'
   - name: Common.SourceBranchName
@@ -57,36 +59,33 @@ steps:
       }
     displayName: Download and Install PBI Tools
 
-  - powershell: |
-      $pbixFolderPath = '$(PbixFolderPath)'
-      $reportSourceFolderPath = '$(ReportSourceFolderPath)'
-      New-Item -ItemType "directory" -Path $pbixFolderPath -Force
-
-      $pbiToolsPath = '$(Agent.ToolsDirectory)\pbi-tools'
-      $env:Path += ";$pbiToolsPath"
-      $pbiToolsCmdPath = Join-Path $pbiToolsPath -ChildPath 'pbi-tools.exe'
-      echo "pbi-tools command path $pbiToolsCmdPath"
-
-      $env:PBITOOLS_LogLevel = 'Verbose'
-
-      $reportSourceFolders = Get-ChildItem -Path $reportSourceFolderPath -Directory
-
-      foreach ($reportSourceFolder in $reportSourceFolders) {
-          echo "Compiling $($reportSourceFolder.Name)"
-          pbi-tools compile-pbix $reportSourceFolder.FullName
-
-          $compiledPbixFilePath = Join-Path '$(Build.SourcesDirectory)' -ChildPath "$($reportSourceFolder.Name).pbix"
-          echo "Moving compiled PBIX file from $compiledPbixFilePath to $pbixFolderPath"
-          Move-Item $compiledPbixFilePath $pbixFolderPath
-      }
+  - task: PowerShell@2
+    inputs:
+      filePath: '$(Build.SourcesDirectory)/ci-cd/deploy/Ensure-PowerBIWorkspace.ps1'
+      arguments: '-PbiToolsPath ''$(Agent.ToolsDirectory)\pbi-tools'' -ReportSourceFolderPath ''$(ReportSourceFolderPath)'' -pbixFolderPath ''$(PbixFolderPath)'''
+      showWarnings: true
     displayName: Compile PBIX Files
 
   - task: PowerShell@2
     inputs:
-      filePath: '$(Build.SourcesDirectory)/ci-cd/Import-PowerBIReports.ps1'
+      filePath: '$(Build.SourcesDirectory)/ci-cd/deploy/Ensure-PowerBIWorkspace.ps1'
+      arguments: '-TenantId ''$(TenantId)'' -ClientId ''$(ClientId)'' -ClientSecret ''$(ClientSecret)'' -WorkspaceName ''${{ parameters.WorkspaceName }}'''
+      showWarnings: true
+    displayName: Ensure ${{ parameters.WorkspaceName }} workspace
+
+  - task: PowerShell@2
+    inputs:
+      filePath: '$(Build.SourcesDirectory)/ci-cd/deploy/Import-PowerBIDatasets.ps1'
+      arguments: '-TenantId ''$(TenantId)'' -ClientId ''$(ClientId)'' -ClientSecret ''$(ClientSecret)'' -WorkspaceName ''${{ parameters.WorkspaceName }}'' -BimFolderPath ''$(BimFolderPath)'''
+      showWarnings: true
+    displayName: Import Reports to ${{ parameters.WorkspaceName }}
+
+  - task: PowerShell@2
+    inputs:
+      filePath: '$(Build.SourcesDirectory)/ci-cd/deploy/Import-PowerBIReports.ps1'
       arguments: '-TenantId ''$(TenantId)'' -ClientId ''$(ClientId)'' -ClientSecret ''$(ClientSecret)'' -WorkspaceName ''${{ parameters.WorkspaceName }}'' -PbixFolderPath ''$(PbixFolderPath)'''
       showWarnings: true
-    displayName: 'Import PBIX Files'
+    displayName: Import Reports to ${{ parameters.WorkspaceName }}
 
   - publish: $(PbixFolderPath)
     artifact: 'PBIX'

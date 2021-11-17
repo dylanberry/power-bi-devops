@@ -6,16 +6,14 @@ A set of tools aimed to make managing Power BI artifacts and deployments easier.
 
 The basic workflow allows
 
-### Export
+### Export Pipeline
 
-1. Report author builds reports and datasets in a deveopment environment
-1. Azure DevOps :
-    1. Exports datasets as `.bim` files (json/TMSL)
-    1. Exports reports as `.pbix` files (binary)
-    1. Extracts the pbix contents (json + xml)
-    1. Commits the exported/extracted source code to git
+1. Exports datasets as `.bim` files (json/TMSL)
+1. Exports reports (all report items with do not include `dataset` in the name) as `.pbix` files (binary)
+1. Extracts the pbix contents (json + xml)
+1. Commits the exported/extracted source code to git
 
-### Build/Deploy
+### Deploy Pipeline
 
 1. The report deployment pipeline is queued in Azure DevOps
 1. The Tabular Model Scripting Language (TMSL) dataset file is deployed via the XMLA endpoints
