@@ -20,6 +20,7 @@ steps:
     inputs:
       filePath: '$(Build.SourcesDirectory)/ci-cd/export/Export-PowerBIDataset.ps1'
       arguments: '-TenantId ''$(TenantId)'' -ClientId ''$(ClientId)'' -ClientSecret ''$(ClientSecret)'' -WorkspaceName ''${{ parameters.WorkspaceName }}'' -BimFolderPath ''$(Common.BimFolderPath)'''
+      pwsh: true
       showWarnings: true
     displayName: 'Export Dataset BIM Files'
 
@@ -27,6 +28,7 @@ steps:
     inputs:
       filePath: '$(Build.SourcesDirectory)/ci-cd/export/Export-PowerBIReports.ps1'
       arguments: '-TenantId ''$(TenantId)'' -ClientId ''$(ClientId)'' -ClientSecret ''$(ClientSecret)'' -WorkspaceName ''${{ parameters.WorkspaceName }}'' -PbixFolderPath ''$(Common.ExportedPbixFolderPath)'''
+      pwsh: true
       showWarnings: true
     displayName: 'Export PBIX Files'
 
@@ -40,6 +42,7 @@ steps:
     inputs:
       filePath: '$(Build.SourcesDirectory)/ci-cd/util/Install-PbiTools.ps1'
       arguments: '-PbiToolsPath ''$(Common.PbiToolsPath)'''
+      pwsh: true
       showWarnings: true
     displayName: Download and Install PBI Tools
       
@@ -47,6 +50,7 @@ steps:
     inputs:
       filePath: '$(Build.SourcesDirectory)/ci-cd/export/Extract-PowerBIReports.ps1'
       arguments: '-PbiToolsPath ''$(Common.PbiToolsPath)'' -PbixFolderPath ''$(Common.ExportedPbixFolderPath)'' -ReportSourceFolderPath ''$(Common.ReportSourceFolderPath)'''
+      pwsh: true
       showWarnings: true
     displayName: Extract PBIX Files
 

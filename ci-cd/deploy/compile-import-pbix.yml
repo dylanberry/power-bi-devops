@@ -20,6 +20,7 @@ steps:
     inputs:
       filePath: '$(Build.SourcesDirectory)/ci-cd/deploy/Ensure-PowerBIWorkspace.ps1'
       arguments: '-TenantId ''$(TenantId)'' -ClientId ''$(ClientId)'' -ClientSecret ''$(ClientSecret)'' -WorkspaceName ''${{ parameters.WorkspaceName }}'''
+      pwsh: true
       showWarnings: true
     displayName: Ensure ${{ parameters.WorkspaceName }} workspace
 
@@ -37,6 +38,7 @@ steps:
     inputs:
       filePath: '$(Build.SourcesDirectory)/ci-cd/util/Install-PbiTools.ps1'
       arguments: '-PbiToolsPath ''$(Common.PbiToolsPath)'''
+      pwsh: true
       showWarnings: true
     displayName: Download and Install PBI Tools
 
@@ -44,6 +46,7 @@ steps:
     inputs:
       filePath: '$(Build.SourcesDirectory)/ci-cd/deploy/Compile-PowerBIReports.ps1'
       arguments: '-PbiToolsPath ''$(Common.PbiToolsPath)'' -ReportSourceFolderPath ''$(Common.ReportSourceFolderPath)'' -pbixFolderPath ''$(Common.CompiledPbixFolderPath)'''
+      pwsh: true
       showWarnings: true
     displayName: Compile PBIX Files
 
@@ -51,6 +54,7 @@ steps:
     inputs:
       filePath: '$(Build.SourcesDirectory)/ci-cd/deploy/Import-PowerBIReports.ps1'
       arguments: '-TenantId ''$(TenantId)'' -ClientId ''$(ClientId)'' -ClientSecret ''$(ClientSecret)'' -WorkspaceName ''${{ parameters.WorkspaceName }}'' -PbixFolderPath ''$(Common.CompiledPbixFolderPath)'''
+      pwsh: true
       showWarnings: true
     displayName: Import Reports to ${{ parameters.WorkspaceName }}
 
