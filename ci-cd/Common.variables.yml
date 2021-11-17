@@ -1,3 +1,7 @@
+parameters:
+  - name: WorkspaceName
+    type: string
+    displayName: Workspace Name (Environment)
 variables:
   - group: PowerBI
   - name: Common.PbiToolsPath

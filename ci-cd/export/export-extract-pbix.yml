@@ -10,6 +10,8 @@ pool:
 
 variables:
   - template: ../Common.variables.yml
+    parameters:
+      WorkspaceName: ${{ parameters.WorkspaceName }}
 
 steps:
 
