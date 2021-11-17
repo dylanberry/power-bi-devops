@@ -9,7 +9,8 @@ $sourcesDirectory = './s'
 $buildDirectory = './b'
 $artifactStagingDirectory = './a'
 
-$pbixFolderPath = "$buildDirectory/pbix"
+$exportedPbixFolderPath = "$buildDirectory/pbix"
+$compiledPbixFolderPath = "$artifactStagingDirectory/pbix"
 $reportSourceFolderPath = "$sourcesDirectory/src/reports"
 $bimFolderPath = "$sourcesDirectory/src/datasets"
 
@@ -26,7 +27,7 @@ $params = @{
     ClientSecret = $clientSecret
     TenantId = $tenantId
     WorkspaceName = $sourceWorkspaceName
-    PbixFolderPath = $pbixFolderPath
+    PbixFolderPath = $exportedPbixFolderPath
 }
 ./export/Export-PowerBIReports.ps1 @params
 
@@ -35,7 +36,7 @@ echo "Extract PBIX Files"
 $params = @{
     PbiToolsPath = $pbiToolsPath
     ReportSourceFolderPath = $reportSourceFolderPath
-    PbixFolderPath = $pbixFolderPath
+    PbixFolderPath = $exportedPbixFolderPath
 }
 ./export/Extract-PowerBIReports.ps1 @params
 
@@ -76,7 +77,7 @@ echo "Compile PBIX Files"
 $params = @{
     PbiToolsPath = $pbiToolsPath
     ReportSourceFolderPath = $reportSourceFolderPath
-    PbixFolderPath = $pbixFolderPath
+    PbixFolderPath = $compiledPbixFolderPath
 }
 ./deploy/Compile-PowerBIReports.ps1 @params
 
@@ -87,7 +88,7 @@ $params = @{
     ClientSecret = $clientSecret
     TenantId = $tenantId
     WorkspaceName = $targetWorkspaceName
-    PbixFolderPath = $pbixFolderPath
+    PbixFolderPath = $compiledPbixFolderPath
 }
 ./deploy/Import-PowerBIReports.ps1 @params
 

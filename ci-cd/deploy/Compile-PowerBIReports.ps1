@@ -24,7 +24,7 @@ foreach ($reportSourceFolder in $reportSourceFolders) {
     echo "Compiling $($reportSourceFolder.Name)"
     pbi-tools compile-pbix $reportSourceFolder.FullName
 
-    $compiledPbixFilePath = Join-Path '$(Build.SourcesDirectory)' -ChildPath "$($reportSourceFolder.Name).pbix"
-    echo "Moving compiled PBIX file from $compiledPbixFilePath to $PbixFolderPath"
-    Move-Item $compiledPbixFilePath $PbixFolderPath
+    # $compiledPbixFilePath = Join-Path $PWD -ChildPath "$($reportSourceFolder.Name).pbix"
+    # echo "Moving compiled PBIX file from $compiledPbixFilePath to $PbixFolderPath"
+    # Move-Item $compiledPbixFilePath $PbixFolderPath
 }
