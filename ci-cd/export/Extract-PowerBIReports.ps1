@@ -26,5 +26,5 @@ foreach ($reportFile in $reportFiles) {
 
     $extractedPbixFolderPath = Join-Path $PbixFolderPath -ChildPath $reportFile.BaseName
     echo "Moving extracted PBIX Folder from $extractedPbixFolderPath to $reportSourceFolderPath"
-    Move-Item $extractedPbixFolderPath $reportSourceFolderPath
+    Move-Item $extractedPbixFolderPath $reportSourceFolderPath -Force
 }
