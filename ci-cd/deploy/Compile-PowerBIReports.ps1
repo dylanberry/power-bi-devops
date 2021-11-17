@@ -12,9 +12,9 @@ param (
 
 New-Item -ItemType "directory" -Path $PbixFolderPath -Force
 
-$env:Path += ";$pbiToolsPath"
-$pbiToolsCmdPath = Join-Path $pbiToolsPath -ChildPath 'pbi-tools.exe'
+$pbiToolsCmdPath = Join-Path $PbiToolsPath -ChildPath 'pbi-tools.exe'
 echo "pbi-tools command path $pbiToolsCmdPath"
+$env:Path += ";$PbiToolsPath"
 
 $env:PBITOOLS_LogLevel = 'Verbose'
 

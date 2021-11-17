@@ -16,23 +16,29 @@ param (
     [string]$BimFolderPath
 )
 
-$assemblyName = 'Microsoft.Identity.Client.dll'
+$assemblyName = 'Microsoft.Identity.Client'
 if (-not ([System.AppDomain]::CurrentDomain.GetAssemblies() | ? ManifestModule -like $assemblyName)) {
-    Install-Package Microsoft.Identity.Client -RequiredVersion 4.6.0 -Force -Scope CurrentUser -Destination . -SkipDependencies
-    $assemblyItem = gci -Path '.\Microsoft.Identity.Client.4.6.0\lib\netcoreapp2.1\' -Recurse -Filter "$assemblyName*"
+    Install-Package Microsoft.Identity.Client -RequiredVersion 4.25.0 -Force -Scope CurrentUser -Destination . -SkipDependencies
+    $assemblyItem = gci -Path ".\$((gci -Directory -Filter "$assemblyName*").Name)\lib\netcoreapp2.1\" -Recurse -Filter "$assemblyName.dll"
     [System.Reflection.Assembly]::LoadFrom($assemblyItem.FullName)
 }
 
-$assemblyName = 'Microsoft.AnalysisServices.Core.dll'
+$assemblyName = 'Microsoft.AnalysisServices.Core'
 if (-not ([System.AppDomain]::CurrentDomain.GetAssemblies() | ? ManifestModule -like $assemblyName)) {
     Install-Package Microsoft.AnalysisServices.NetCore.retail.amd64 -RequiredVersion 19.22.0.1 -Force -Scope CurrentUser -Destination . -SkipDependencies
-    $assemblyItem = gci -Recurse -Filter "$assemblyName*"
+    $assemblyItem = gci -Recurse -Filter "$assemblyName.dll"
     [System.Reflection.Assembly]::LoadFrom($assemblyItem.FullName)
+}
 
-    $assemblyItem = gci -Recurse -Filter "$assemblyName*"
+$assemblyName = 'Microsoft.AnalysisServices.Tabular'
+if (-not ([System.AppDomain]::CurrentDomain.GetAssemblies() | ? ManifestModule -like $assemblyName)) {
+    $assemblyItem = gci -Recurse -Filter "$assemblyName.dll"
     [System.Reflection.Assembly]::LoadFrom($assemblyItem.FullName)
+}
 
-    $assemblyItem = gci -Recurse -Filter "$assemblyName*"
+$assemblyName = 'Microsoft.AnalysisServices.Tabular.Json'
+if (-not ([System.AppDomain]::CurrentDomain.GetAssemblies() | ? ManifestModule -like $assemblyName)) {
+    $assemblyItem = gci -Recurse -Filter "$assemblyName.dll"
     [System.Reflection.Assembly]::LoadFrom($assemblyItem.FullName)
 }
 

@@ -47,16 +47,17 @@ $failedReportFilePaths = @()
 foreach ($report in $reports) {
     try {
         $fileName = "$PbixFolderPath\$($report.Name).pbix"
+        Remove-Item $fileName -ErrorAction SilentlyContinue
         echo "Export report id $($report.Id) to $fileName"
         Export-PowerBIReport -WorkspaceId $workspace.Id -Id $report.Id -OutFile $fileName
     }
     catch {
         Resolve-PowerBIError -Last
-        $failedReportFilePaths += $reportFilePath
+        $failedList += $report.Name
     }
 }
 
-if ($failedReportFilePaths.Length -gt 0) {
-    $failedReportFilePathsString = $failedReportFilePaths -join '`n'
-    throw "The following pbix files failed to import: $failedReportFilePathsString"
+if ($failedList.Length -gt 0) {
+    $failedString = $failedList -join '`n'
+    throw "The following reports failed to export: $failedString"
 }
