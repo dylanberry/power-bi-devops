@@ -17,6 +17,8 @@ $pbiToolsPath = 'C:\pbi-tools'
 
 pushd $PSScriptRoot
 
+$ErrorActionPreference = 'Stop'
+
 
 echo "Export reports from $sourceWorkspaceName"
 $params = @{
@@ -35,7 +37,7 @@ $params = @{
     ReportSourceFolderPath = $reportSourceFolderPath
     PbixFolderPath = $pbixFolderPath
 }
-./deploy/Extract-PowerBIReports.ps1 @params
+./export/Extract-PowerBIReports.ps1 @params
 
 
 echo "Export datasets from $sourceWorkspaceName"
