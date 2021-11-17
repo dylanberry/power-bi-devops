@@ -11,6 +11,7 @@ param (
 )
 
 New-Item -ItemType "directory" -Path $PbixFolderPath -Force
+cd $PbixFolderPath
 
 $pbiToolsCmdPath = Join-Path $PbiToolsPath -ChildPath 'pbi-tools.exe'
 echo "pbi-tools command path $pbiToolsCmdPath"

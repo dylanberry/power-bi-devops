@@ -9,62 +9,12 @@ pool:
   vmImage: windows-latest
 
 variables:
-  - group: PowerBI
-  - name: ReportSourceFolderPath
-    value: '$(Build.SourcesDirectory)/src/'
-  - name: BimFolderPath
-    value: '$(Build.BinariesDirectory)/bim/'
-  - name: PbixFolderPath
-    value: '$(Build.BinariesDirectory)/pbix/'
-  - name: Common.WorkspaceExportBranchName
-    value: 'workspace-${{ parameters.WorkspaceName }}-export-$(Build.BuildId)'
-  - name: Common.SourceBranchName
-    value: $[ replace('$(Build.SourceBranch)', 'refs/heads/', '') ]
+  - template: ../Common.variables.yml
 
 steps:
 
   - checkout: self
     persistCredentials: True
-
-  - powershell: choco install PowerBI -ignore-checksums
-    displayName: Install PowerBI
-
-  - powershell: |
-      $pbiToolsPath = '$(Agent.ToolsDirectory)\pbi-tools'
-      $mkdirResult = mkdir $pbiToolsPath -Force
-
-      try {
-          pushd $pbiToolsPath
-          $pbiToolsUrl = "https://api.github.com/repos/action-bi-toolkit/pbi-tools/releases/latest"
-          
-          $response = Invoke-WebRequest $pbiToolsUrl -UseBasicParsing
-          $content = $response.Content | ConvertFrom-Json
-          
-          $assetResponse = Invoke-WebRequest $content.assets_url -UseBasicParsing
-          $assetContent = $assetResponse.Content | ConvertFrom-Json
-          
-          $fileName = Split-Path -Path $assetContent.browser_download_url[0] -Leaf
-
-          $downloadZipFile = Join-Path $pbiToolsPath -ChildPath $fileName
-          $downloadResponse = Invoke-WebRequest $assetContent.browser_download_url[0] -OutFile $downloadZipFile -UseBasicParsing
-          
-          $expandResult = Expand-Archive $downloadZipFile -DestinationPath $pbiToolsPath -Force
-          
-          $pbiToolsCmdPath = Join-Path $pbiToolsPath -ChildPath 'pbi-tools.exe'
-          $env:Path += ";$pbiToolsPath"
-          $env:PBITOOLS_LogLevel = 'Verbose'
-      }
-      finally {
-          popd
-      }
-    displayName: Download and Install PBI Tools
-
-  - task: PowerShell@2
-    inputs:
-      filePath: '$(Build.SourcesDirectory)/ci-cd/deploy/Ensure-PowerBIWorkspace.ps1'
-      arguments: '-PbiToolsPath ''$(Agent.ToolsDirectory)\pbi-tools'' -ReportSourceFolderPath ''$(ReportSourceFolderPath)'' -pbixFolderPath ''$(PbixFolderPath)'''
-      showWarnings: true
-    displayName: Compile PBIX Files
 
   - task: PowerShell@2
     inputs:
@@ -76,17 +26,34 @@ steps:
   - task: PowerShell@2
     inputs:
       filePath: '$(Build.SourcesDirectory)/ci-cd/deploy/Import-PowerBIDatasets.ps1'
-      arguments: '-TenantId ''$(TenantId)'' -ClientId ''$(ClientId)'' -ClientSecret ''$(ClientSecret)'' -WorkspaceName ''${{ parameters.WorkspaceName }}'' -BimFolderPath ''$(BimFolderPath)'''
+      arguments: '-TenantId ''$(TenantId)'' -ClientId ''$(ClientId)'' -ClientSecret ''$(ClientSecret)'' -WorkspaceName ''${{ parameters.WorkspaceName }}'' -BimFolderPath ''$(Common.BimFolderPath)'''
       showWarnings: true
-    displayName: Import Reports to ${{ parameters.WorkspaceName }}
+    displayName: Import Datasets to ${{ parameters.WorkspaceName }}
+
+  - powershell: choco install PowerBI -ignore-checksums
+    displayName: Install PowerBI
+
+  - task: PowerShell@2
+    inputs:
+      filePath: '$(Build.SourcesDirectory)/ci-cd/util/Install-PbiTools.ps1'
+      arguments: '-PbiToolsPath ''$(Common.PbiToolsPath)'''
+      showWarnings: true
+    displayName: Download and Install PBI Tools
+
+  - task: PowerShell@2
+    inputs:
+      filePath: '$(Build.SourcesDirectory)/ci-cd/deploy/Compile-PowerBIReports.ps1'
+      arguments: '-PbiToolsPath ''$(Common.PbiToolsPath)'' -ReportSourceFolderPath ''$(Common.ReportSourceFolderPath)'' -pbixFolderPath ''$(Common.CompiledPbixFolderPath)'''
+      showWarnings: true
+    displayName: Compile PBIX Files
 
   - task: PowerShell@2
     inputs:
       filePath: '$(Build.SourcesDirectory)/ci-cd/deploy/Import-PowerBIReports.ps1'
-      arguments: '-TenantId ''$(TenantId)'' -ClientId ''$(ClientId)'' -ClientSecret ''$(ClientSecret)'' -WorkspaceName ''${{ parameters.WorkspaceName }}'' -PbixFolderPath ''$(PbixFolderPath)'''
+      arguments: '-TenantId ''$(TenantId)'' -ClientId ''$(ClientId)'' -ClientSecret ''$(ClientSecret)'' -WorkspaceName ''${{ parameters.WorkspaceName }}'' -PbixFolderPath ''$(Common.CompiledPbixFolderPath)'''
       showWarnings: true
     displayName: Import Reports to ${{ parameters.WorkspaceName }}
 
-  - publish: $(PbixFolderPath)
+  - publish: $(Common.CompiledPbixFolderPath)
     artifact: 'PBIX'
     condition: always()

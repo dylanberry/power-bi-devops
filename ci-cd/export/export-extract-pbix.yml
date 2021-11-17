@@ -9,15 +9,7 @@ pool:
   vmImage: windows-latest
 
 variables:
-  - group: PowerBI
-  - name: PbixFolderPath
-    value: '$(Build.BinariesDirectory)/pbix/'
-  - name: ReportSourceFolderPath
-    value: '$(Build.SourcesDirectory)/src/'
-  - name: Common.WorkspaceExportBranchName
-    value: 'workspace-${{ parameters.WorkspaceName }}-export-$(Build.BuildId)'
-  - name: Common.SourceBranchName
-    value: $[ replace('$(Build.SourceBranch)', 'refs/heads/', '') ]
+  - template: ../Common.variables.yml
 
 steps:
 
@@ -27,50 +19,27 @@ steps:
   - task: PowerShell@2
     inputs:
       filePath: '$(Build.SourcesDirectory)/ci-cd/export/Export-PowerBIReports.ps1'
-      arguments: '-TenantId ''$(TenantId)'' -ClientId ''$(ClientId)'' -ClientSecret ''$(ClientSecret)'' -WorkspaceName ''${{ parameters.WorkspaceName }}'' -PbixFolderPath ''$(PbixFolderPath)'''
+      arguments: '-TenantId ''$(TenantId)'' -ClientId ''$(ClientId)'' -ClientSecret ''$(ClientSecret)'' -WorkspaceName ''${{ parameters.WorkspaceName }}'' -PbixFolderPath ''$(Common.ExportedPbixFolderPath)'''
       showWarnings: true
     displayName: 'Export PBIX Files'
 
-  - publish: $(PbixFolderPath)
+  - publish: $(Common.ExportedPbixFolderPath)
     artifact: 'PBIX'
 
   - powershell: choco install PowerBI -ignore-checksums
     displayName: Install PowerBI
 
-  - powershell: |
-      $pbiToolsPath = '$(Agent.ToolsDirectory)\pbi-tools'
-      $mkdirResult = mkdir $pbiToolsPath -Force
-
-      try {
-          pushd $pbiToolsPath
-          $pbiToolsUrl = "https://api.github.com/repos/action-bi-toolkit/pbi-tools/releases/latest"
-          
-          $response = Invoke-WebRequest $pbiToolsUrl -UseBasicParsing
-          $content = $response.Content | ConvertFrom-Json
-          
-          $assetResponse = Invoke-WebRequest $content.assets_url -UseBasicParsing
-          $assetContent = $assetResponse.Content | ConvertFrom-Json
-          
-          $fileName = Split-Path -Path $assetContent.browser_download_url[0] -Leaf
-
-          $downloadZipFile = Join-Path $pbiToolsPath -ChildPath $fileName
-          $downloadResponse = Invoke-WebRequest $assetContent.browser_download_url[0] -OutFile $downloadZipFile -UseBasicParsing
-          
-          $expandResult = Expand-Archive $downloadZipFile -DestinationPath $pbiToolsPath -Force
-          
-          $pbiToolsCmdPath = Join-Path $pbiToolsPath -ChildPath 'pbi-tools.exe'
-          $env:Path += ";$pbiToolsPath"
-          $env:PBITOOLS_LogLevel = 'Verbose'
-      }
-      finally {
-          popd
-      }
-    displayName: Download and Install PBI Tool
+  - task: PowerShell@2
+    inputs:
+      filePath: '$(Build.SourcesDirectory)/ci-cd/util/Install-PbiTools.ps1'
+      arguments: '-PbiToolsPath ''$(Common.PbiToolsPath)'''
+      showWarnings: true
+    displayName: Download and Install PBI Tools
       
   - task: PowerShell@2
     inputs:
       filePath: '$(Build.SourcesDirectory)/ci-cd/export/Extract-PowerBIReports.ps1'
-      arguments: '-PbiToolsPath ''$(Agent.ToolsDirectory)\pbi-tools'' -PbixFolderPath ''$(PbixFolderPath)'' -ReportSourceFolderPath ''$(ReportSourceFolderPath)'''
+      arguments: '-PbiToolsPath ''$(Common.PbiToolsPath)'' -PbixFolderPath ''$(Common.ExportedPbixFolderPath)'' -ReportSourceFolderPath ''$(Common.ReportSourceFolderPath)'''
       showWarnings: true
     displayName: Extract PBIX Files
 

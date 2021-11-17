@@ -5,9 +5,10 @@ $tenantId = $env:tenantId
 $sourceWorkspaceName = "DevOps"
 $targetWorkspaceName = "UAT"
 
-$sourcesDirectory = './s'
-$buildDirectory = './b'
-$artifactStagingDirectory = './a'
+$workDirectory = 'C:\w'
+$sourcesDirectory = "$workDirectory/s"
+$buildDirectory = "$workDirectory/b"
+$artifactStagingDirectory = "$workDirectory/a"
 
 $exportedPbixFolderPath = "$buildDirectory/pbix"
 $compiledPbixFolderPath = "$artifactStagingDirectory/pbix"
@@ -16,9 +17,17 @@ $bimFolderPath = "$sourcesDirectory/src/datasets"
 
 $pbiToolsPath = 'C:\pbi-tools'
 
-pushd $PSScriptRoot
-
 $ErrorActionPreference = 'Stop'
+
+New-Item -ItemType "directory" -Path $workDirectory -Force
+cd $workDirectory
+
+
+echo "Download and Install PBI Tools"
+$params = @{
+    PbiToolsPath = $pbiToolsPath 
+}
+&"$PSScriptRoot/util/Install-PbiTools.ps1" @params
 
 
 echo "Export reports from $sourceWorkspaceName"
@@ -29,7 +38,7 @@ $params = @{
     WorkspaceName = $sourceWorkspaceName
     PbixFolderPath = $exportedPbixFolderPath
 }
-./export/Export-PowerBIReports.ps1 @params
+&"$PSScriptRoot/export/Export-PowerBIReports.ps1" @params
 
 
 echo "Extract PBIX Files"
@@ -38,7 +47,7 @@ $params = @{
     ReportSourceFolderPath = $reportSourceFolderPath
     PbixFolderPath = $exportedPbixFolderPath
 }
-./export/Extract-PowerBIReports.ps1 @params
+&"$PSScriptRoot/export/Extract-PowerBIReports.ps1" @params
 
 
 echo "Export datasets from $sourceWorkspaceName"
@@ -49,7 +58,7 @@ $params = @{
     WorkspaceName = $sourceWorkspaceName
     BimFolderPath = $bimFolderPath
 }
-./export/Export-PowerBIDataset.ps1 @params
+&"$PSScriptRoot/export/Export-PowerBIDataset.ps1" @params
 
 
 echo "Ensure $targetWorkspaceName workspace created"
@@ -59,7 +68,7 @@ $params = @{
     TenantId = $tenantId
     WorkspaceName = $targetWorkspaceName
 }
-./deploy/Ensure-PowerBIWorkspace.ps1 @params
+&"$PSScriptRoot/deploy/Ensure-PowerBIWorkspace.ps1" @params
 
 
 echo "Import datasets to $targetWorkspaceName"
@@ -70,7 +79,7 @@ $params = @{
     WorkspaceName = $targetWorkspaceName
     BimFolderPath = $bimFolderPath
 }
-powershell -version 5.1 ./deploy/Import-PowerBIDatasets.ps1 @params
+powershell -version 5.1 "$PSScriptRoot/deploy/Import-PowerBIDatasets.ps1" @params
 
 
 echo "Compile PBIX Files"
@@ -79,7 +88,7 @@ $params = @{
     ReportSourceFolderPath = $reportSourceFolderPath
     PbixFolderPath = $compiledPbixFolderPath
 }
-./deploy/Compile-PowerBIReports.ps1 @params
+&"$PSScriptRoot/deploy/Compile-PowerBIReports.ps1" @params
 
 
 echo "Import reports to $targetWorkspaceName"
@@ -90,7 +99,7 @@ $params = @{
     WorkspaceName = $targetWorkspaceName
     PbixFolderPath = $compiledPbixFolderPath
 }
-./deploy/Import-PowerBIReports.ps1 @params
+&"$PSScriptRoot/deploy/Import-PowerBIReports.ps1" @params
 
 
 echo "Rebind report datasets and update credentials in $targetWorkspaceName"
@@ -100,4 +109,4 @@ $params = @{
     TenantId = $tenantId
     WorkspaceName = $targetWorkspaceName
 }
-./deploy/Update-ReportDatasets.ps1 @params
+&"$PSScriptRoot/deploy/Update-ReportDatasets.ps1" @params

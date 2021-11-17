@@ -1,0 +1,17 @@
+variables:
+  - group: PowerBI
+  - name: Common.PbiToolsPath
+    value: '$(Agent.ToolsDirectory)\pbi-tools'
+  - name: Common.WorkspaceExportBranchName
+    value: 'workspace-${{ parameters.WorkspaceName }}-export-$(Build.BuildId)'
+  - name: Common.SourceBranchName
+    value: $[ replace('$(Build.SourceBranch)', 'refs/heads/', '') ]
+
+  - name: Common.ExportedPbixFolderPath
+    value: '$(Build.BinariesDirectory)/pbix'
+  - name: Common.CompiledPbixFolderPath
+    value: '$(Build.ArtifactStagingDirectory)/pbix'
+  - name: Common.ReportSourceFolderPath
+    value: '$(Build.SourcesDirectory)/src/reports'
+  - name: Common.BimFolderPath
+    value: '$(Build.SourcesDirectory)/src/datasets'
