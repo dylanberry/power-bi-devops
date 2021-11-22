@@ -21,7 +21,7 @@ steps:
   - task: PowerShell@2
     inputs:
       filePath: '$(Common.PipelinesFolder)/export/Export-PowerBIDataset.ps1'
-      arguments: '-TenantId ''$(TenantId)'' -ClientId ''$(ClientId)'' -ClientSecret ''$(ClientSecret)'' -WorkspaceName ''${{ parameters.WorkspaceName }}'' -BimFolderPath ''$(Common.BimFolderPath)'''
+      arguments: '-TenantId ''$(TenantId)'' -ClientId ''$(ClientId)'' -ClientSecret ''$(ClientSecret)'' -ToolsFolderPath ''$(Common.ToolsFolderPath)'' -WorkspaceName ''${{ parameters.WorkspaceName }}'' -BimFolderPath ''$(Common.BimFolderPath)'''
       pwsh: true
       showWarnings: true
     displayName: 'Export Dataset BIM Files'

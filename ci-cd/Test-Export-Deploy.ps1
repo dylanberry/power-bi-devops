@@ -6,6 +6,7 @@ $sourceWorkspaceName = "DevOps"
 $targetWorkspaceName = "UAT"
 
 $workDirectory = 'C:\w'
+$toolsFolderPath = "$workDirectory/t"
 $sourcesDirectory = "$workDirectory/s"
 $buildDirectory = "$workDirectory/b"
 $artifactStagingDirectory = "$workDirectory/a"
@@ -15,7 +16,7 @@ $compiledPbixFolderPath = "$artifactStagingDirectory/pbix"
 $reportSourceFolderPath = "$sourcesDirectory/src/reports"
 $bimFolderPath = "$sourcesDirectory/src/datasets"
 
-$pbiToolsPath = 'C:\pbi-tools'
+$pbiToolsPath = "$toolsFolderPath/pbi-tools"
 
 $ErrorActionPreference = 'Stop'
 
@@ -55,6 +56,7 @@ $params = @{
     ClientId = $clientId
     ClientSecret = $clientSecret
     TenantId = $tenantId
+    ToolsFolderPath = $toolsFolderPath
     WorkspaceName = $sourceWorkspaceName
     BimFolderPath = $bimFolderPath
 }

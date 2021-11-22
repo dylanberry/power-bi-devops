@@ -13,32 +13,35 @@ param (
     [string]$WorkspaceName,
 
     [Parameter(Mandatory=$true)]
+    [string]$ToolsFolderPath,
+
+    [Parameter(Mandatory=$true)]
     [string]$BimFolderPath
 )
 
 $assemblyName = 'Microsoft.Identity.Client'
 if (-not ([System.AppDomain]::CurrentDomain.GetAssemblies() | ? ManifestModule -like $assemblyName)) {
-    Install-Package Microsoft.Identity.Client -RequiredVersion 4.25.0 -Force -Scope CurrentUser -Destination . -SkipDependencies
-    $assemblyItem = gci -Path ".\$((gci -Directory -Filter "$assemblyName*").Name)\lib\netcoreapp2.1\" -Recurse -Filter "$assemblyName.dll"
+    Install-Package Microsoft.Identity.Client -RequiredVersion 4.25.0 -Force -Scope CurrentUser -Destination $ToolsFolderPath -SkipDependencies
+    $assemblyItem = gci -Path "$ToolsFolderPath\$((gci -Directory -Filter "$assemblyName*").Name)\lib\netcoreapp2.1\" -Recurse -Filter "$assemblyName.dll"
     [System.Reflection.Assembly]::LoadFrom($assemblyItem.FullName)
 }
 
 $assemblyName = 'Microsoft.AnalysisServices.Core'
 if (-not ([System.AppDomain]::CurrentDomain.GetAssemblies() | ? ManifestModule -like $assemblyName)) {
-    Install-Package Microsoft.AnalysisServices.NetCore.retail.amd64 -RequiredVersion 19.22.0.1 -Force -Scope CurrentUser -Destination . -SkipDependencies
-    $assemblyItem = gci -Recurse -Filter "$assemblyName.dll"
+    Install-Package Microsoft.AnalysisServices.NetCore.retail.amd64 -RequiredVersion 19.22.0.1 -Force -Scope CurrentUser -Destination $ToolsFolderPath -SkipDependencies
+    $assemblyItem = gci -Path $ToolsFolderPath -Recurse -Filter "$assemblyName.dll"
     [System.Reflection.Assembly]::LoadFrom($assemblyItem.FullName)
 }
 
 $assemblyName = 'Microsoft.AnalysisServices.Tabular'
 if (-not ([System.AppDomain]::CurrentDomain.GetAssemblies() | ? ManifestModule -like $assemblyName)) {
-    $assemblyItem = gci -Recurse -Filter "$assemblyName.dll"
+    $assemblyItem = gci -Path $ToolsFolderPath -Recurse -Filter "$assemblyName.dll"
     [System.Reflection.Assembly]::LoadFrom($assemblyItem.FullName)
 }
 
 $assemblyName = 'Microsoft.AnalysisServices.Tabular.Json'
 if (-not ([System.AppDomain]::CurrentDomain.GetAssemblies() | ? ManifestModule -like $assemblyName)) {
-    $assemblyItem = gci -Recurse -Filter "$assemblyName.dll"
+    $assemblyItem = gci -Path $ToolsFolderPath -Recurse -Filter "$assemblyName.dll"
     [System.Reflection.Assembly]::LoadFrom($assemblyItem.FullName)
 }
 

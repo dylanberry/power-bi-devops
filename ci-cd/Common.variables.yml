@@ -6,8 +6,10 @@ variables:
   - group: PowerBI
   - name: Common.PipelinesFolder
     value: $(Build.SourcesDirectory)/ci-cd
+  - name: Common.ToolsFolderPath
+    value: '$(Agent.ToolsDirectory)'
   - name: Common.PbiToolsPath
-    value: '$(Agent.ToolsDirectory)\pbi-tools'
+    value: '$(Common.ToolsFolderPath)\pbi-tools'
   - name: Common.WorkspaceExportBranchName
     value: 'workspace-${{ parameters.WorkspaceName }}-export-$(Build.BuildId)'
   - name: Common.SourceBranchName
