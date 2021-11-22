@@ -32,14 +32,22 @@ There are 2 major pieces:
 
 You can use these tools in 2 ways:
 
-1. Any Windows pipeline agent - the export/import process can be performed on Windows agent which has chocolatey installed. In this case, PowerBI is installed for every pipeline run and can take 5+ minutes depending on the agent.
-1. Specific Windows pipeline agents - you can preconfigure agents with PowerBI and pbi-tools which saves time on each run.
+1. Any Windows pipeline agent - the export/import process can be performed on Windows agent which has chocolatey installed. In this case, Power BI Desktop is installed for every pipeline run and can take 5+ minutes depending on the agent.
+1. Specific Windows pipeline agents - you can preconfigure agents with Power BI Desktop and pbi-tools which saves time on each run.
 
 ### Prerequisites
 
+#### For Agent Configuration
+
 1. Azure RM Service Connection
 1. Variable Group + PAT (currently hardcoded to `group: AgentPoolAdmin` and `$(PAT)`)
-1. SharePoint app-only access (https://docs.microsoft.com/en-us/sharepoint/dev/solution-guidance/security-apponly-azuread)
+
+#### For CI/CD
+
+1. Variable Group `group: PowerBI`
+    - `$(TenantId)`
+    - `$(ClientId)`
+    - `$(ClientSecret)`
 
 ## Other Resources
 
