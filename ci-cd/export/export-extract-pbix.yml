@@ -20,15 +20,15 @@ steps:
 
   - task: PowerShell@2
     inputs:
-      filePath: '$(Build.SourcesDirectory)/ci-cd/export/Export-PowerBIDataset.ps1'
-      arguments: '-TenantId ''$(TenantId)'' -ClientId ''$(ClientId)'' -ClientSecret ''$(ClientSecret)'' -WorkspaceName ''${{ parameters.WorkspaceName }}'' -BimFolderPath ''$(Common.BimFolderPath)'''
+      filePath: '$(Common.PipelinesFolder)/export/Export-PowerBIDataset.ps1'
+      arguments: '-TenantId ''$(TenantId)'' -ClientId ''$(ClientId)'' -ClientSecret ''$(ClientSecret)'' -ToolsFolderPath ''$(Common.ToolsFolderPath)'' -WorkspaceName ''${{ parameters.WorkspaceName }}'' -BimFolderPath ''$(Common.BimFolderPath)'''
       pwsh: true
       showWarnings: true
     displayName: 'Export Dataset BIM Files'
 
   - task: PowerShell@2
     inputs:
-      filePath: '$(Build.SourcesDirectory)/ci-cd/export/Export-PowerBIReports.ps1'
+      filePath: '$(Common.PipelinesFolder)/export/Export-PowerBIReports.ps1'
       arguments: '-TenantId ''$(TenantId)'' -ClientId ''$(ClientId)'' -ClientSecret ''$(ClientSecret)'' -WorkspaceName ''${{ parameters.WorkspaceName }}'' -PbixFolderPath ''$(Common.ExportedPbixFolderPath)'''
       pwsh: true
       showWarnings: true
@@ -42,7 +42,7 @@ steps:
 
   - task: PowerShell@2
     inputs:
-      filePath: '$(Build.SourcesDirectory)/ci-cd/util/Install-PbiTools.ps1'
+      filePath: '$(Common.PipelinesFolder)/util/Install-PbiTools.ps1'
       arguments: '-PbiToolsPath ''$(Common.PbiToolsPath)'''
       pwsh: true
       showWarnings: true
@@ -50,7 +50,7 @@ steps:
       
   - task: PowerShell@2
     inputs:
-      filePath: '$(Build.SourcesDirectory)/ci-cd/export/Extract-PowerBIReports.ps1'
+      filePath: '$(Common.PipelinesFolder)/export/Extract-PowerBIReports.ps1'
       arguments: '-PbiToolsPath ''$(Common.PbiToolsPath)'' -PbixFolderPath ''$(Common.ExportedPbixFolderPath)'' -ReportSourceFolderPath ''$(Common.ReportSourceFolderPath)'''
       pwsh: true
       showWarnings: true
