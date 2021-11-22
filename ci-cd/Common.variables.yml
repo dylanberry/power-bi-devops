@@ -4,6 +4,8 @@ parameters:
     displayName: Workspace Name (Environment)
 variables:
   - group: PowerBI
+  - name: Common.PipelinesFolder
+    value: $(Build.SourcesDirectory)/ci-cd
   - name: Common.PbiToolsPath
     value: '$(Agent.ToolsDirectory)\pbi-tools'
   - name: Common.WorkspaceExportBranchName

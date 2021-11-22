@@ -20,7 +20,7 @@ steps:
 
   - task: PowerShell@2
     inputs:
-      filePath: '$(Build.SourcesDirectory)/ci-cd/deploy/Ensure-PowerBIWorkspace.ps1'
+      filePath: '$(Common.PipelinesFolder)/deploy/Ensure-PowerBIWorkspace.ps1'
       arguments: '-TenantId ''$(TenantId)'' -ClientId ''$(ClientId)'' -ClientSecret ''$(ClientSecret)'' -WorkspaceName ''${{ parameters.WorkspaceName }}'''
       pwsh: true
       showWarnings: true
@@ -28,7 +28,7 @@ steps:
 
   - task: PowerShell@2
     inputs:
-      filePath: '$(Build.SourcesDirectory)/ci-cd/deploy/Import-PowerBIDatasets.ps1'
+      filePath: '$(Common.PipelinesFolder)/deploy/Import-PowerBIDatasets.ps1'
       arguments: '-TenantId ''$(TenantId)'' -ClientId ''$(ClientId)'' -ClientSecret ''$(ClientSecret)'' -WorkspaceName ''${{ parameters.WorkspaceName }}'' -BimFolderPath ''$(Common.BimFolderPath)'''
       showWarnings: true
     displayName: Import Datasets to ${{ parameters.WorkspaceName }}
@@ -38,7 +38,7 @@ steps:
 
   - task: PowerShell@2
     inputs:
-      filePath: '$(Build.SourcesDirectory)/ci-cd/util/Install-PbiTools.ps1'
+      filePath: '$(Common.PipelinesFolder)/util/Install-PbiTools.ps1'
       arguments: '-PbiToolsPath ''$(Common.PbiToolsPath)'''
       pwsh: true
       showWarnings: true
@@ -46,7 +46,7 @@ steps:
 
   - task: PowerShell@2
     inputs:
-      filePath: '$(Build.SourcesDirectory)/ci-cd/deploy/Compile-PowerBIReports.ps1'
+      filePath: '$(Common.PipelinesFolder)/deploy/Compile-PowerBIReports.ps1'
       arguments: '-PbiToolsPath ''$(Common.PbiToolsPath)'' -ReportSourceFolderPath ''$(Common.ReportSourceFolderPath)'' -pbixFolderPath ''$(Common.CompiledPbixFolderPath)'''
       pwsh: true
       showWarnings: true
@@ -54,7 +54,7 @@ steps:
 
   - task: PowerShell@2
     inputs:
-      filePath: '$(Build.SourcesDirectory)/ci-cd/deploy/Import-PowerBIReports.ps1'
+      filePath: '$(Common.PipelinesFolder)/deploy/Import-PowerBIReports.ps1'
       arguments: '-TenantId ''$(TenantId)'' -ClientId ''$(ClientId)'' -ClientSecret ''$(ClientSecret)'' -WorkspaceName ''${{ parameters.WorkspaceName }}'' -PbixFolderPath ''$(Common.CompiledPbixFolderPath)'''
       pwsh: true
       showWarnings: true
