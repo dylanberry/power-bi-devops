@@ -60,6 +60,14 @@ steps:
       showWarnings: true
     displayName: Import Reports to ${{ parameters.WorkspaceName }}
 
+  - task: PowerShell@2
+    inputs:
+      filePath: '$(Common.PipelinesFolder)/deploy/Update-ReportDatasets.ps1'
+      arguments: '-TenantId ''$(TenantId)'' -ClientId ''$(ClientId)'' -ClientSecret ''$(ClientSecret)'' -WorkspaceName ''${{ parameters.WorkspaceName }}'''
+      pwsh: true
+      showWarnings: true
+    displayName: Rebind report datasets and update credentials in ${{ parameters.WorkspaceName }}
+
   - publish: $(Common.CompiledPbixFolderPath)
     artifact: 'PBIX'
     condition: always()
