@@ -30,6 +30,39 @@ If(-not(Get-InstalledModule MicrosoftPowerBIMgmt.Reports -ErrorAction silentlyco
     Install-Module MicrosoftPowerBIMgmt.Reports -Force -Verbose -Scope CurrentUser
 }
 
+function Update-ReportContent{
+    param ($reportFilePath, $stagingWorkspaceName, $targetWorkspaceId, $targetReportId)
+
+    echo "Get workspace $stagingWorkspaceName"
+    $stagingWorkspace = Get-PowerBIWorkspace -Name $stagingWorkspaceName
+    
+    if(!$stagingWorkspace) {
+        echo "Creating new workspace $stagingWorkspaceName"
+        $stagingWorkspace = New-PowerBIWorkspace -Name $stagingWorkspaceName
+    }
+    echo "Uploading report $($reportFilePath.FullName) to $stagingWorkspaceName"
+    $stagingReport = New-PowerBIReport -Path $reportFilePath.FullName -WorkspaceId $stagingWorkspace.Id -ConflictAction CreateOrOverwrite -ErrorAction Stop
+
+    $baseUri = "https://api.powerbi.com/v1.0/myorg"
+
+    $body = @{ 
+        sourceReport = 
+            @{
+                sourceReportId="$($stagingReport.Id)"
+                sourceWorkspaceId="$($stagingWorkspace.Id)"
+            }
+        sourceType = "ExistingReport"
+    } | ConvertTo-Json
+
+    echo 'Copy report content from staging to target'
+    $updateReportUri = "$baseUri/groups/$targetWorkspaceId/reports/$targetReportId/UpdateReportContent"
+    echo $updateReportUri
+    Invoke-PowerBIRestMethod -Method Post -Url $updateReportUri -Body $body -ContentType 'application/json' -Verbose;
+
+    echo 'Remove the staging report'
+    Remove-PowerBIReport -Id $stagingReport.Id -WorkspaceId $stagingWorkspace.Id;
+}
+
 $powerBiCredentials = New-Object System.Management.Automation.PSCredential $ClientId, (ConvertTo-SecureString $ClientSecret -AsPlainText -Force)
 
 $account = Connect-PowerBIServiceAccount -Tenant $TenantId -Credential $powerBiCredentials -ServicePrincipal
@@ -37,16 +70,24 @@ $account = Connect-PowerBIServiceAccount -Tenant $TenantId -Credential $powerBiC
 echo "Get workspace $WorkspaceName"
 $workspace = Get-PowerBIWorkspace -Name $WorkspaceName
 
-$reportFilePaths = gci $PbixFolderPath -Filter *.pbi* -File | Select FullName
+$reportFilePaths = gci $PbixFolderPath -Filter *.pbi* -File | Select FullName, BaseName
 $failedReportFilePaths = @()
 foreach($reportFilePath in $reportFilePaths) {
     try {
-        echo "Uploading report $($reportFilePath.FullName)"
-        New-PowerBIReport -Path $reportFilePath.FullName -WorkspaceId $workspace.Id -ConflictAction CreateOrOverwrite -ErrorAction Stop
+        echo "Looking up report $($reportFilePath.BaseName)"
+        $report = Get-PowerBIReport -workspace $workspace -Name $reportFilePath.BaseName
+
+        if ($report) {
+            echo "Uploading updated report $($reportFilePath.FullName)"
+            Update-ReportContent $reportFilePath 'DeploymentStaging' $workspace.Id $report.Id
+        } else {
+            echo "Uploading new report $($reportFilePath.FullName)"
+            New-PowerBIReport -Path $reportFilePath.FullName -WorkspaceId $workspace.Id -ConflictAction CreateOrOverwrite -ErrorAction Stop
+        }
     }
     catch {
         Resolve-PowerBIError -Last
-        $failedReportFilePaths += $reportFilePath
+        $failedReportFilePaths += $reportFilePath.FullName
     }
 }
 
