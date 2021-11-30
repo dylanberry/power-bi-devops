@@ -56,7 +56,6 @@ function Update-ReportContent{
 
     echo 'Copy report content from staging to target'
     $updateReportUri = "$baseUri/groups/$targetWorkspaceId/reports/$targetReportId/UpdateReportContent"
-    echo $updateReportUri
     Invoke-PowerBIRestMethod -Method Post -Url $updateReportUri -Body $body -ContentType 'application/json' -Verbose;
 
     echo 'Remove the staging report'
