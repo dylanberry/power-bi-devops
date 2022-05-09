@@ -1,0 +1,100 @@
+parameters:
+- name: EnvironmentName
+  type: string
+  displayName: Environment Name
+- name: ApplicationName
+  type: string
+  displayName: Application Name
+- name: DevOpsKeyVault
+  type: string
+  displayName: DevOps Key Vault
+- name: DatawarehouseResourceGroup
+  type: string
+  displayName: Datawarehouse Resource Group
+- name: BimFilePath
+  type: string
+  displayName: Bim Source File Path
+- name: DatasetName
+  type: string
+  displayName: Dataset Name
+- name: DatasourceName
+  type: string
+  displayName: Datasource Name
+- name: ReportList
+  type: object
+  displayName: Report List
+  default: ' '
+- name: DevOpsKeyVaultServiceConnection
+  type: string
+  displayName: DevOps Key Vault Service Connection
+
+jobs:
+- deployment: Deploy_Dataset
+  displayName: Deploy Dataset
+  ${{ if or(contains(lower(parameters.EnvironmentName), 'dev'), contains(lower(parameters.EnvironmentName), 'test')) }}:
+    environment: BI-Dev-Generic
+  ${{ else }}:
+    environment: BI-${{ parameters.EnvironmentName }}
+
+  variables:
+  - template: ../Common.variables.yml
+  - name: ReportListJson
+    value: ${{ convertToJson(parameters.ReportList) }}
+  - name: WorkspaceName
+    value: '${{ parameters.ApplicationName }} (${{ parameters.EnvironmentName }})'
+  
+  strategy:
+    runOnce:
+      deploy:
+
+        steps:
+        - checkout: self
+
+        - task: AzureCLI@2
+          displayName: 'Lookup datawarehouse from key vault and ensure instance is online'
+          name: Config
+          inputs:
+            azureSubscription: ${{ parameters.DevOpsKeyVaultServiceConnection }}
+            scriptType: 'ps'
+            scriptPath: '$(Common.PipelinesFolder)/util/Get-DataWarehouseConfig.ps1'
+            arguments: '-ResourceGroupName ''${{ parameters.DatawarehouseResourceGroup }}'''
+            scriptLocation: 'scriptPath'
+
+        - task: AzureCLI@2
+          displayName: 'Lookup Power BI SPN credentials from key vault'
+          name: PbiCredentials
+          inputs:
+            azureSubscription: ${{ parameters.DevOpsKeyVaultServiceConnection }}
+            scriptType: 'ps'
+            scriptPath: '$(Common.PipelinesFolder)/util/Get-PowerBiDevOpsCredentials.ps1'
+            arguments: '-KeyVaultName ''${{ parameters.DevOpsKeyVault }}'' -ApplicationName ''${{ parameters.ApplicationName }}'' -EnvironmentName ''${{ parameters.EnvironmentName }}'''
+            scriptLocation: 'scriptPath'
+
+        - task: PowerShell@2
+          inputs:
+            filePath: '$(Common.PipelinesFolder)/deploy/Import-PowerBIDataset.ps1'
+            arguments: '-TenantId ''$(TenantId)'' -ClientId ''$(ClientId)'' -ClientSecret ''$(ClientSecret)'' -WorkspaceName ''$(WorkspaceName)'' -DatasetName ''${{ parameters.DatasetName }}'' -BimFilePath ''${{ parameters.BimFilePath }}'' -DatasourceName ''${{ parameters.DatasourceName }}'' -SqlServer ''$(Config.DataWarehouseServer)'' -SqlDatabase ''$(Config.DataWarehouseDatabase)'' -TmslOutputPath ''$(Build.ArtifactStagingDirectory)/${{ parameters.DatasetName }}.tmsl'''
+            pwsh: true
+            showWarnings: true
+          displayName: 'Configure and import datasets to $(WorkspaceName)'
+          
+        - publish: $(Build.ArtifactStagingDirectory)
+          artifact: dataset
+          displayName: Publish dataset
+          condition: always()
+
+        - task: PowerShell@2
+          inputs:
+            filePath: '$(Common.PipelinesFolder)/deploy/Update-DatasetCredentials.ps1'
+            arguments: '-TenantId ''$(TenantId)'' -ClientId ''$(ClientId)'' -ClientSecret ''$(ClientSecret)'' -WorkspaceName ''$(WorkspaceName)'' -DatasetName ''${{ parameters.DatasetName }}'' -DatasourceName $(BI-PowerBI.DatasourceName) -SqlUserName ''$(Config.DataWarehouseUser)'' -SqlPassword ''$(Config.DataWarehousePassword)'''
+            pwsh: true
+            showWarnings: true
+          displayName: 'Update dataset datasource credentials'
+
+        - task: PowerShell@2
+          inputs:
+            filePath: '$(Common.PipelinesFolder)/deploy/Update-ReportDatasetBindings.ps1'
+            arguments: '-TenantId ''$(TenantId)'' -ClientId ''$(ClientId)'' -ClientSecret ''$(ClientSecret)'' -WorkspaceName ''$(WorkspaceName)'' -DatasetName ''${{ parameters.DatasetName }}'' -ReportList $(''$(ReportListJson)'')'
+            pwsh: true
+            showWarnings: true
+          displayName: Rebind reports to dataset

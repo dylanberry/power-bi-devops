@@ -7,8 +7,13 @@ param (
     [string]$ReportSourceFolderPath,
 
     [Parameter(Mandatory=$true)]
-    [string]$PbixFolderPath
+    [string]$PbixFolderPath,
+
+    [Parameter()]
+    [string[]]$ReportList
 )
+
+$ErrorActionPreference = 'Stop'
 
 New-Item -ItemType "directory" -Path $PbixFolderPath -Force
 cd $PbixFolderPath
@@ -18,12 +23,18 @@ echo "pbi-tools command path $pbiToolsCmdPath"
 $env:Path += ";$PbiToolsPath"
 
 $env:PBITOOLS_LogLevel = 'Verbose'
-
-$reportSourceFolders = Get-ChildItem -Path $ReportSourceFolderPath -Directory
-
-foreach ($reportSourceFolder in $reportSourceFolders) {
-    echo "Compiling $($reportSourceFolder.Name)"
-    pbi-tools compile-pbix $reportSourceFolder.FullName
+try {
+    $ReportList = $ReportList | ConvertFrom-Json
+    Write-Host "Report List:"
+    Write-Host $ReportList
+  }
+  catch {
+    Write-Host "Report List is Empty"
+  }
+foreach($reportName in $ReportList) {
+    $reportFilePath = Join-Path $ReportSourceFolderPath -ChildPath "$reportName"
+    echo "Compiling $reportName from $reportFilePath"
+    pbi-tools compile-pbix $reportFilePath -overwrite
 
     # $compiledPbixFilePath = Join-Path $PWD -ChildPath "$($reportSourceFolder.Name).pbix"
     # echo "Moving compiled PBIX file from $compiledPbixFilePath to $PbixFolderPath"

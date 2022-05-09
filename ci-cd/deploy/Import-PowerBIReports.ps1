@@ -14,9 +14,18 @@ param (
     [string]$WorkspaceName,
 
     [Parameter(Mandatory=$true)]
-    [string]$PbixFolderPath
+    [string]$PbixFolderPath,
+
+    [Parameter(Mandatory=$true)]
+    [string]$DatasetName,
+
+    [Parameter()]
+    [string[]]$ReportList
 )
 
+$ErrorActionPreference = 'Stop'
+
+#Install Modules
 If(-not(Get-InstalledModule MicrosoftPowerBIMgmt.Profile -ErrorAction silentlycontinue)) {
     Set-PSRepository PSGallery -InstallationPolicy Trusted
     Install-Module MicrosoftPowerBIMgmt.Profile -Force -Verbose -Scope CurrentUser
@@ -30,6 +39,9 @@ If(-not(Get-InstalledModule MicrosoftPowerBIMgmt.Reports -ErrorAction silentlyco
     Install-Module MicrosoftPowerBIMgmt.Reports -Force -Verbose -Scope CurrentUser
 }
 
+#Constants
+$baseUri = "https://api.powerbi.com/v1.0/myorg"
+
 function Update-ReportContent{
     param ($reportFilePath, $stagingWorkspaceName, $targetWorkspaceId, $targetReportId)
 
@@ -40,11 +52,10 @@ function Update-ReportContent{
         echo "Creating new workspace $stagingWorkspaceName"
         $stagingWorkspace = New-PowerBIWorkspace -Name $stagingWorkspaceName
     }
-    echo "Uploading report $($reportFilePath.FullName) to $stagingWorkspaceName"
-    $stagingReport = New-PowerBIReport -Path $reportFilePath.FullName -WorkspaceId $stagingWorkspace.Id -ConflictAction CreateOrOverwrite -ErrorAction Stop
+    echo "Uploading report $reportFilePath to $stagingWorkspaceName"
+    $stagingReport = New-PowerBIReport -Path $reportFilePath -WorkspaceId $stagingWorkspace.Id -ConflictAction CreateOrOverwrite -ErrorAction Stop
 
-    $baseUri = "https://api.powerbi.com/v1.0/myorg"
-
+    
     $body = @{ 
         sourceReport = 
             @{
@@ -54,11 +65,14 @@ function Update-ReportContent{
         sourceType = "ExistingReport"
     } | ConvertTo-Json
 
-    echo 'Copy report content from staging to target'
-    $updateReportUri = "$baseUri/groups/$targetWorkspaceId/reports/$targetReportId/UpdateReportContent"
-    Invoke-PowerBIRestMethod -Method Post -Url $updateReportUri -Body $body -ContentType 'application/json' -Verbose;
 
-    echo 'Remove the staging report'
+
+    Write-Host 'Copy report content from staging to target'
+    $updateReportUri = "$baseUri/groups/$targetWorkspaceId/reports/$targetReportId/UpdateReportContent"
+    
+    Invoke-PowerBIRestMethod -Method Post -Url $updateReportUri -Body $body -ContentType 'application/json' -Verbose;
+    #Invoke-RestMethod -Method Post -Uri $updateReportUri -Body $body -Headers $headers -ContentType 'application/json' -Verbose;
+    Write-Host  'Remove the staging report'
     Remove-PowerBIReport -Id $stagingReport.Id -WorkspaceId $stagingWorkspace.Id;
 }
 
@@ -68,25 +82,49 @@ $account = Connect-PowerBIServiceAccount -Tenant $TenantId -Credential $powerBiC
 
 echo "Get workspace $WorkspaceName"
 $workspace = Get-PowerBIWorkspace -Name $WorkspaceName
+try {
+    $ReportList = $ReportList | ConvertFrom-Json
+    Write-Host "Report List:"
+    Write-Host $ReportList
+  }
+  catch {
+    Write-Host "Report List is Empty"
+  }
 
-$reportFilePaths = gci $PbixFolderPath -Filter *.pbi* -File | Select FullName, BaseName
+#Get the dataset to filter the reports
+Write-Host "Get workspace $WorkspaceName"
+
+$groupFilter = "name eq '$WorkspaceName'"
+$groups = Invoke-PowerBIRestMethod -Method GET -Url "$baseUri/groups?`$filter=$groupFilter" | ConvertFrom-Json
+
+Write-Host "Groups:"
+Write-Host ($groups | Format-List | Out-String)
+
+
+$groupId = $groups.value[0].id
+
+$datasets = Invoke-PowerBIRestMethod -Method GET -Url "$baseUri/groups/$groupId/datasets" | ConvertFrom-Json
+$dataset = $datasets.value | ? name -eq $DatasetName
+
+
 $failedReportFilePaths = @()
-foreach($reportFilePath in $reportFilePaths) {
+foreach($reportName in $ReportList) {
     try {
-        echo "Looking up report $($reportFilePath.BaseName)"
-        $report = Get-PowerBIReport -workspace $workspace -Name $reportFilePath.BaseName
+        $reportFilePath = Join-Path $PbixFolderPath -ChildPath "$reportName.pbix"
+        echo "Looking up report $reportFilePath"
+        $report = Get-PowerBIReport -workspace $workspace -Name $reportName | Where-Object {$_.datasetId -eq $dataset.id} 
 
         if ($report) {
-            echo "Uploading updated report $($reportFilePath.FullName)"
+            echo "Uploading updated report $reportFilePath"
             Update-ReportContent $reportFilePath 'DeploymentStaging' $workspace.Id $report.Id
         } else {
-            echo "Uploading new report $($reportFilePath.FullName)"
-            New-PowerBIReport -Path $reportFilePath.FullName -WorkspaceId $workspace.Id -ConflictAction CreateOrOverwrite -ErrorAction Stop
+            echo "Uploading new report $reportFilePath"
+            New-PowerBIReport -Path $reportFilePath -WorkspaceId $workspace.Id -ConflictAction CreateOrOverwrite -ErrorAction Stop
         }
     }
     catch {
         Resolve-PowerBIError -Last
-        $failedReportFilePaths += $reportFilePath.FullName
+        $failedReportFilePaths += $reportFilePath
     }
 }
 
