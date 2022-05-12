@@ -3,6 +3,7 @@ $token = az account get-access-token --resource 'https://analysis.windows.net/po
 $headers = @{"Authorization"="Bearer $($token.accessToken)"}
 $baseUri = "https://api.powerbi.com/v1.0/myorg"
 
+
 $WorkspaceName = 'Source'
 $ReportName = 'helloworld_pbiservice_1'
 $DummyDatasetName = 'blank'
@@ -82,34 +83,6 @@ Write-Output "Zipping $reportFolder to $restoredReportPath"
 Compress-Archive $reportFolder\* $restoredReportPath -Force
 
 Write-Output "Uploading report $restoredReportPath"
-#Install-Module SqlServer -AllowPrerelease -Confirm:$False -Force -AllowClobber
-#Import-Module -Name SqlServer
-# $powerBiCredentials = New-Object System.Management.Automation.PSCredential $env:ClientId, (ConvertTo-SecureString $env:ClientSecret -AsPlainText -Force)
-# $account = Connect-PowerBIServiceAccount -Tenant $env:TenantId -Credential $powerBiCredentials -ServicePrincipal
-# New-PowerBIReport -Path $restoredReportPath -WorkspaceId $targetGroupId -ConflictAction CreateOrOverwrite -ErrorAction Stop
-# Invoke-RestMethod -Method POST -Uri "$baseUri/groups/$($targetGroupId)/imports?datasetDisplayName=$($TargetReportName).pbix&nameConflict=CreateOrOverwrite" `
-#   -Headers $headers `
-#   -ContentType 'multipart/form-data' `
-#   -InFile $restoredReportPath
-
-# $fileBytes = [System.IO.File]::ReadAllBytes($restoredReportPath);
-# $fileEnc = [System.Text.Encoding]::GetEncoding('ISO-8859-1').GetString($fileBytes);
-# $fileEnc = [System.IO.File]::ReadAllText($restoredReportPath);
-# $boundary = [System.Guid]::NewGuid().ToString(); 
-# $LF = "`r`n";
-# $bodyLines = ( 
-#     "--$boundary",
-#     "Content-Disposition: form-data",
-#     "",
-#     $fileEnc,
-#     "--$boundary--$" 
-# ) -join $LF
-# Invoke-RestMethod -Uri "$baseUri/groups/$($targetGroupId)/imports?datasetDisplayName=$($TargetReportName).pbix&nameConflict=CreateOrOverwrite" `
-#   -Headers $Headers `
-#   -Method Post `
-#   -ContentType "multipart/form-data; boundary=`"$boundary`"" `
-#   -Body $bodyLines
-
 $uri = "$baseUri/groups/$($targetGroupId)/imports?datasetDisplayName=$($TargetReportName).pbix&nameConflict=CreateOrOverwrite"
 $boundary = "---------------------------" + (Get-Date).Ticks.ToString("x")
 $boundarybytes = [System.Text.Encoding]::ASCII.GetBytes("`r`n--" + $boundary + "`r`n")
