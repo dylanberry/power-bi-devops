@@ -4,9 +4,11 @@ $headers = @{"Authorization"="Bearer $($token.accessToken)"}
 $baseUri = "https://api.powerbi.com/v1.0/myorg"
 
 
-$WorkspaceName = 'Source'
-$ReportName = 'helloworld_pbiservice_1'
+$SourceWorkspaceName = 'Source'
+$SourceReportName = 'helloworld_pbiservice_1'
+
 $DummyDatasetName = 'blank'
+$DummyReportName = 'blank'
 
 $TargetWorkspaceName = 'Target'
 $TargetDatasetName = 'helloworld'
@@ -15,47 +17,67 @@ $TargetReportName = 'helloworld_restored'
 
 ##### Backup #####
 
-Write-Output "Get workspace $WorkspaceName"
+Write-Output "Get source workspace $SourceWorkspaceName"
 $groups = Invoke-RestMethod -Method GET `
-  -Uri "$baseUri/groups?`$filter=name eq '$WorkspaceName'" `
+  -Uri "$baseUri/groups?`$filter=name eq '$SourceWorkspaceName'" `
   -Headers $headers
-$groupId = $groups.value[0].Id
+$sourceGroupId = $groups.value[0].Id
 
-Write-Host "Get $ReportName report"
-$reports = Invoke-RestMethod -Method GET -Uri "$baseUri/groups/$groupId/reports" `
+Write-Host "Get source $SourceReportName report"
+$reports = Invoke-RestMethod -Method GET -Uri "$baseUri/groups/$sourceGroupId/reports" `
   -Headers $headers
-$report = $reports.value | ? name -EQ $ReportName
+$sourceReport = $reports.value | ? name -EQ $SourceReportName
 
-Write-Host "Get $DummyDatasetName dataset"
-$datasets = Invoke-RestMethod -Method GET -Uri "$baseUri/groups/$groupId/datasets" `
+Write-Host "Get dummy $DummyReportName report"
+$reports = Invoke-RestMethod -Method GET -Uri "$baseUri/groups/$sourceGroupId/reports" `
   -Headers $headers
-$dataset = $datasets.value | ? name -eq $DummyDatasetName
- 
-$exportReportName = "$($report.name)-export"
+$dummyReport = $reports.value | ? name -EQ $DummyReportName
+
+$exportReportName = "$($sourceReport.name)-export"
 $cloneBody = @{ "name" = $exportReportName } | ConvertTo-Json -Compress
-Write-Output "Cloning report $($report.name)"
-$exportReport = Invoke-RestMethod -Method POST -Uri "$baseUri/groups/$groupId/reports/$($report.id)/Clone" `
+Write-Output "Cloning dummy report $($dummyReport.name) to $($exportReportName)"
+$exportReport = Invoke-RestMethod -Method POST -Uri "$baseUri/groups/$sourceGroupId/reports/$($dummyReport.id)/Clone" `
   -Headers $headers `
   -Body $cloneBody `
   -ContentType 'application/json'
 
-$rebindBody = @{ "datasetId" = "$($dataset.id)" } | ConvertTo-Json -Compress
-Write-Output "Rebinding report $($exportReport.name) to $($dataset.name)"
-Invoke-RestMethod -Method POST -Uri "$baseUri/groups/$groupId/reports/$($exportReport.id)/Rebind" `
+$updateReportContentBody = @{ 
+    sourceReport = 
+        @{
+            sourceReportId="$($sourceReport.Id)"
+            sourceWorkspaceId="$($sourceGroupId)"
+        }
+    sourceType = "ExistingReport"
+} | ConvertTo-Json
+
+Write-Host "Copy report content from $($sourceReport.name) to $($exportReport.name)"
+Invoke-RestMethod -Method Post -Uri "$baseUri/groups/$sourceGroupId/reports/$($exportReport.id)/UpdateReportContent" `
+  -Headers $headers `
+  -Body $updateReportContentBody `
+  -ContentType 'application/json'
+
+Write-Host "Get $DummyDatasetName dataset"
+$datasets = Invoke-RestMethod -Method GET -Uri "$baseUri/groups/$sourceGroupId/datasets" `
+  -Headers $headers
+$dummyDataset = $datasets.value | ? name -eq $DummyDatasetName
+
+$rebindBody = @{ "datasetId" = "$($dummyDataset.id)" } | ConvertTo-Json -Compress
+Write-Output "Rebinding report $($exportReport.name) to $($dummyDataset.name)"
+Invoke-RestMethod -Method POST -Uri "$baseUri/groups/$sourceGroupId/reports/$($exportReport.id)/Rebind" `
   -Headers $headers `
   -Body $rebindBody `
   -ContentType 'application/json'
 
-$reportFilePath = Join-Path $PWD.Path "$($ReportName).pbix"
+$sourceReportFilePath = Join-Path $PWD.Path "$($SourceReportName).pbix"
 Write-Output "Exporting report $($exportReport.name)"
-Invoke-RestMethod -Method GET -Uri "$baseUri/groups/$groupId/reports/$($exportReport.id)/Export?preferClientRouting=true" `
-  -Headers $headers -OutFile $reportFilePath
+Invoke-RestMethod -Method GET -Uri "$baseUri/groups/$sourceGroupId/reports/$($exportReport.id)/Export?preferClientRouting=true" `
+  -Headers $headers -OutFile $sourceReportFilePath
 
 
 
 ##### Restore #####
 
-Expand-Archive $reportFilePath -Force
+Expand-Archive $sourceReportFilePath -Force
 
 Write-Output "Get workspace $TargetWorkspaceName"
 $groups = Invoke-RestMethod -Method GET `
@@ -68,19 +90,19 @@ $datasets = Invoke-RestMethod -Method GET -Uri "$baseUri/groups/$targetGroupId/d
   -Headers $headers
 $targetDataset = $datasets.value | ? name -eq $TargetDatasetName
 
-$reportConnectionsFilePath = Join-Path $PWD.Path $ReportName "Connections"
+$sourceReportConnectionsFilePath = Join-Path $PWD.Path $SourceReportName "Connections"
 
-Write-Output "Updating dataset connection string in $reportConnectionsFilePath"
-$connections = Get-Content $reportConnectionsFilePath | ConvertFrom-Json
+Write-Output "Updating dataset connection string in $sourceReportConnectionsFilePath"
+$connections = Get-Content $sourceReportConnectionsFilePath | ConvertFrom-Json
 $connections.RemoteArtifacts[0].DatasetId = $targetDataset.id
 
-Write-Output "Saving updated connections file $reportConnectionsFilePath"
-$connections | ConvertTo-Json -Depth 32 | Out-File -FilePath $reportConnectionsFilePath -Encoding utf8 -Force
+Write-Output "Saving updated connections file $sourceReportConnectionsFilePath"
+$connections | ConvertTo-Json -Depth 32 | Out-File -FilePath $sourceReportConnectionsFilePath -Encoding utf8 -Force
 
-$reportFolder = Join-Path $PWD.Path $ReportName
+$sourceReportFolder = Join-Path $PWD.Path $SourceReportName
 $restoredReportPath = Join-Path $PWD.Path "$TargetReportName.pbix"
-Write-Output "Zipping $reportFolder to $restoredReportPath"
-Compress-Archive $reportFolder\* $restoredReportPath -Force
+Write-Output "Zipping $sourceReportFolder to $restoredReportPath"
+Compress-Archive $sourceReportFolder\* $restoredReportPath -Force
 
 Write-Output "Uploading report $restoredReportPath"
 $uri = "$baseUri/groups/$($targetGroupId)/imports?datasetDisplayName=$($TargetReportName).pbix&nameConflict=CreateOrOverwrite"
@@ -117,9 +139,9 @@ Write-Host "Import job created $jobId"
 Start-Sleep -Milliseconds 500
 
 Write-Host "Get reports"
-$reports = Invoke-RestMethod -Method GET -Uri "$baseUri/groups/$targetGroupId/reports" `
+$sourceReports = Invoke-RestMethod -Method GET -Uri "$baseUri/groups/$targetGroupId/reports" `
   -Headers $headers
-$targetReport = $reports.value | ? name -EQ $TargetReportName
+$targetReport = $sourceReports.value | ? name -EQ $TargetReportName
 
 Write-Output "Rebinding report $($targetReport.name) to $($targetDataset.name)"
 $rebindBody = @{ "datasetId" = "$($targetDataset.id)" } | ConvertTo-Json -Compress
